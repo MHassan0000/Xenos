@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.reference/
+.qa/
+*.local
+.env
+*.tsbuildinfo

@@ -1,0 +1,12 @@
+Xenos uses original application code and wallpaper geometry.
+
+Runtime third-party notices are distributed in /licenses/:
+- React: React-MIT.txt
+- React DOM: React-DOM-MIT.txt
+- Lucide icons: Lucide-ISC.txt (includes upstream icon notices)
+- Inter font: Inter-OFL.txt
+- JetBrains Mono font: JetBrains-Mono-OFL.txt
+
+Portfolio project images and workflow diagrams are sourced from the owner's reference portfolio, https://hassanyousaf.vercel.app/ . Their original third-party branding is retained.
+
+Design/interaction references: daedalOS by Dustin Brett (https://dustinbrett.com/) and LithOS by Naji Ullah (https://github.com/Naji-Ullah/lithos). No code or assets from these projects are redistributed.

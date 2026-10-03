@@ -1,0 +1,313 @@
+[
+  {
+    "name": "Lunex",
+    "description": "E-commerce Store secured With Stripe",
+    "tags": ["Next JS", "BetterAuth", "Stripe", "Neon Drizzle"],
+    "images": ["/assets/project1.webp"],
+    "demo": "https://lunex-nine.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Lunex",
+    "id": "lunex",
+    "category": "Web & software",
+    "featured": true
+  },
+  {
+    "name": "MindForge",
+    "description": "AI Powered Education Platform with Voice Assistants and personalized learning experience.",
+    "tags": ["Next js", "Supabase", "Clerk", "VAPI"],
+    "images": ["/assets/project2.webp"],
+    "demo": "https://mind-forge-teal.vercel.app/",
+    "repo": "https://github.com/MHassan0000/MindForge",
+    "id": "mindforge",
+    "category": "AI products",
+    "featured": true
+  },
+  {
+    "name": "Oraclex",
+    "description": "AI RAG Chatbot Agent with Admin Dashboard",
+    "tags": ["Next JS", "Supabase", "Langchain", "Typescript", "UploadThing"],
+    "images": ["/assets/oraclex.webp"],
+    "demo": "https://oraclex-iota.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Oraclex",
+    "id": "oraclex",
+    "category": "AI products",
+    "featured": true
+  },
+  {
+    "name": "Content Agent",
+    "description": "Autonomous AI Content Generation Workflow ( Report Generation , Script Writing , Ideas )",
+    "tags": ["Python", "StreamLit", "Modal", "Open-Router"],
+    "images": ["/assets/content-agent.webp"],
+    "demo": null,
+    "repo": "https://github.com/MHassan0000/Autonomous-Content-System",
+    "id": "content-agent",
+    "category": "AI products",
+    "featured": false
+  },
+  {
+    "name": "Research Agent",
+    "description": "Autonomous Research Agent Workflow For Automatic Report Generation and Retrieval",
+    "tags": ["Python", "Modal", "Streamlit", "Open-Router"],
+    "images": ["/assets/research-agent.webp"],
+    "demo": null,
+    "repo": "https://github.com/MHassan0000/Autonomous-Research-Agent",
+    "id": "research-agent",
+    "category": "AI products",
+    "featured": false
+  },
+  {
+    "name": "Obsidian",
+    "description": "Enterprise Inventory Management System",
+    "tags": ["Next JS", "Supabase", "Postgresql", "Typescript"],
+    "images": ["/assets/obsidian.webp"],
+    "demo": "https://obsidian-virid-one.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Database-Project",
+    "id": "obsidian",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "Elytra",
+    "description": "City Survey and Management Platform with User and Admin Dashboards.",
+    "tags": [
+      "Next JS",
+      "Tailwind CSS",
+      "Java Spring-Boot",
+      "Postgresql",
+      "Maven"
+    ],
+    "images": ["/assets/project3.webp"],
+    "demo": null,
+    "repo": "https://github.com/MHassan0000/Elytra",
+    "id": "elytra",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "PowerTrack",
+    "description": "AI Powered Personal Fitness Tracker App",
+    "tags": ["Next JS", "Supabase", "Tailwind CSS", "Framer Motion"],
+    "images": ["/assets/powertrack.webp"],
+    "demo": "https://power-track-beryl.vercel.app/",
+    "repo": "https://github.com/MHassan0000/PowerTrack",
+    "id": "powertrack",
+    "category": "AI products",
+    "featured": false
+  },
+  {
+    "name": "Axon",
+    "description": "AI Powered Personal Project and Task Manager platform",
+    "tags": ["Next JS", "Supabase", "Tailwind CSS", "Framer Motion", "Stripe"],
+    "images": ["/assets/axon.webp"],
+    "demo": "https://axon-sigma.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Axon",
+    "id": "axon",
+    "category": "AI products",
+    "featured": true
+  },
+  {
+    "name": "Pulse",
+    "description": "Social Media microblogging platform",
+    "tags": ["Next JS", "MongoDb", "Tailwind CSS", "Clerk", "UploadThing"],
+    "images": ["/assets/pulse.webp"],
+    "demo": "https://pulse-omega-kohl.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Pulse",
+    "id": "pulse",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "Voxa",
+    "description": "Video Conferencing Platform",
+    "tags": ["Next JS", "Stream", "Tailwind CSS", "Framer Motion", "Clerk"],
+    "images": ["/assets/voxalogo.webp"],
+    "demo": "https://voxa-navy.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Voxa",
+    "id": "voxa",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "Codex",
+    "description": "Library Management platform with Admin Dashboard and AI Chatbot Integration",
+    "tags": ["Next JS", "Neon-Drizzle", "Tailwind CSS", "Redis", "AuthJs"],
+    "images": ["/assets/codex.webp"],
+    "demo": "https://codex-zeta-nine.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Codex",
+    "id": "codex",
+    "category": "AI products",
+    "featured": false
+  },
+  {
+    "name": "Lexip",
+    "description": "AI Powered Youtube Thumbnail Generator",
+    "tags": ["Next JS", "Supabase", "Tailwind CSS", "Framer Motion", "Stripe"],
+    "images": ["/assets/lexip.webp"],
+    "demo": "https://lexip-six.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Lexip",
+    "id": "lexip",
+    "category": "AI products",
+    "featured": false
+  },
+  {
+    "name": "Noctra AI",
+    "description": "AI powered Image Editing Platform",
+    "tags": ["Next JS", "Mongo DB", "Tailwind CSS", "Cloudinary", "Clerk"],
+    "images": ["/assets/project4.webp"],
+    "demo": "https://noctra-two.vercel.app/",
+    "repo": "https://github.com/MHassan0000/Noctra",
+    "id": "noctra-ai",
+    "category": "AI products",
+    "featured": false
+  },
+  {
+    "name": "Recoil",
+    "description": "Startup Submission Platform with user management.",
+    "tags": ["Next JS", "Sanity", "OAuth", "Tailwind CSS", "Gsap"],
+    "images": ["/assets/project5.webp"],
+    "demo": null,
+    "repo": "https://github.com/MHassan0000/Recoil",
+    "id": "recoil",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "Password Manager",
+    "description": "Url and Password Manager Platform",
+    "tags": ["React", "Mongo DB", "Express", "Tailwind CSS"],
+    "images": ["/assets/project6.webp"],
+    "demo": null,
+    "repo": "https://github.com/MHassan0000/Password-Manager",
+    "id": "password-manager",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "Library Management System",
+    "description": "OOP Library Management System with Admin,Librarian and User Functionality",
+    "tags": ["C++"],
+    "images": ["/assets/project7.webp"],
+    "demo": null,
+    "repo": "https://github.com/MHassan0000/Library-Management-System-OOP",
+    "id": "library-management-system",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "University Management System",
+    "description": "OOP University Management System with Admin Functionality",
+    "tags": ["C++"],
+    "images": ["/assets/project8.webp"],
+    "demo": null,
+    "repo": "https://github.com/MHassan0000/University-Management-System-OOP",
+    "id": "university-management-system",
+    "category": "Web & software",
+    "featured": false
+  },
+  {
+    "name": "Newsletter Automation Workflow",
+    "description": "A multi-agent newsletter production system that researches topics, gathers source material, creates drafts, refines copy, and distributes finished newsletters through connected email platforms.",
+    "tags": ["n8n", "AI Agents", "Email Automation"],
+    "images": ["/assets/newsletter-automation.webp"],
+    "id": "newsletter-automation-workflow",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "Gmail Inbox Organization Workflow",
+    "description": "An AI-powered inbox management workflow that classifies emails, detects priority, applies labels, generates draft responses, and organizes communication into structured categories.",
+    "tags": ["n8n", "Gmail", "AI Classification"],
+    "images": ["/assets/gmail-organizing-workflow.webp"],
+    "id": "gmail-inbox-organization-workflow",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "Product Video Generator Workflow",
+    "description": "An end-to-end workflow that transforms product details and media assets into promotional videos by processing inputs, generating visuals, managing media steps, and delivering completed content.",
+    "tags": ["n8n", "Video", "Product Marketing"],
+    "images": ["/assets/product-videos-generator.webp"],
+    "id": "product-video-generator-workflow",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "Faceless Shorts Generation Workflow",
+    "description": "A fully automated short-form content pipeline that generates ideas, writes scripts, produces visual assets, creates voiceovers, renders videos, and prepares content for publication.",
+    "tags": ["n8n", "Shorts", "Content Pipeline"],
+    "images": ["/assets/faceless-shorts-uploader-workflow.webp"],
+    "id": "faceless-shorts-generation-workflow",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "Full Content Automation System",
+    "description": "A large-scale content production ecosystem combining AI workflows for ideation, image generation, audio creation, video production, asset management, and publishing operations.",
+    "tags": ["n8n", "AI Content", "Publishing"],
+    "images": ["/assets/content-system-workflow-n8n.webp"],
+    "id": "full-content-automation-system",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "AI RAG Workflow (Supabase)",
+    "description": "An automated document processing and retrieval workflow that ingests documents, generates vector embeddings, stores data in Supabase, and enables intelligent retrieval for conversational AI apps.",
+    "tags": ["n8n", "RAG", "Supabase"],
+    "images": [
+      "/assets/ai-rag-systempart1.webp",
+      "/assets/ai-rag-system-part2(uploader).webp"
+    ],
+    "id": "ai-rag-workflow-supabase",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "AI Executive Personal Assistant",
+    "description": "A multi-agent assistant workflow that manages communication, scheduling, research, and productivity tasks by coordinating specialized agents across daily admin responsibilities.",
+    "tags": ["n8n", "AI Assistant", "Multi-Agent"],
+    "images": [
+      "/assets/ai-personal-assistant.webp",
+      "/assets/ai-personal-assistant-part2.webp",
+      "/assets/ai-personal-assistant-part3.webp",
+      "/assets/ai-personal-assistant-part4.webp"
+    ],
+    "id": "ai-executive-personal-assistant",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "AI Voice Calling Agent (Vapi)",
+    "description": "An AI-powered calling system for outbound calls, lead qualification, voicemail detection, interaction tracking, and structured records of customer communication outcomes.",
+    "tags": ["n8n", "Vapi", "Voice AI"],
+    "images": ["/assets/ai-call-agent.webp"],
+    "id": "ai-voice-calling-agent-vapi",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "Autonomous Web Scraping Workflow",
+    "description": "A web research and intelligence workflow that extracts online data, cleans and organizes information, performs automated analysis, and produces structured business outputs.",
+    "tags": ["n8n", "Web Scraping", "Research"],
+    "images": ["/assets/automatic-web-scrapper.webp"],
+    "id": "autonomous-web-scraping-workflow",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "Discord Automation Bot",
+    "description": "A Discord automation system for community management with moderation, notifications, engagement activities, event-driven automations, and external service integrations.",
+    "tags": ["n8n", "Discord", "Community Ops"],
+    "images": ["/assets/discordbot-automation.webp"],
+    "id": "discord-automation-bot",
+    "category": "Automations",
+    "featured": false
+  },
+  {
+    "name": "Multi-Platform Social Media Distribution System",
+    "description": "A centralized publishing workflow that distributes content across Instagram, Facebook, Threads, TikTok, LinkedIn, X, Bluesky, Pinterest, and YouTube while handling monitoring and logs.",
+    "tags": ["n8n", "Social Media", "Publishing"],
+    "images": ["/assets/social-media-uploader.webp"],
+    "id": "multi-platform-social-media-distribution-system",
+    "category": "Automations",
+    "featured": false
+  }
+]

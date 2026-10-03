@@ -1,0 +1,38 @@
+[
+  {
+    "year": "2025 - Present",
+    "title": "Full-Stack AI Systems",
+    "subtitle": "Production Products & Intelligent Infrastructure",
+    "description": "Now specializing in full-stack products where robust application architecture and AI automation work as one system, from responsive interfaces and secure data layers to agents, retrieval pipelines, and deployment."
+  },
+  {
+    "year": "2024",
+    "title": "AI Automation & Workflow Engineering",
+    "subtitle": "Agents, Orchestration & Intelligent Operations",
+    "description": "Designed multi-step automations that connect AI models, business APIs, structured data, communications, and approval paths into observable workflows that reduce manual operations."
+  },
+  {
+    "year": "2023",
+    "title": "SaaS Platforms & Business Systems",
+    "subtitle": "Product Workflows & Platform Engineering",
+    "description": "Focused on business-critical platforms with role-based experiences, subscriptions, dashboards, third-party integrations, real-time features, and maintainable domain-driven workflows."
+  },
+  {
+    "year": "2022",
+    "title": "Production Architecture & Cloud Delivery",
+    "subtitle": "Scalability, Reliability & Deployment",
+    "description": "Built production-oriented systems with typed application boundaries, reusable modules, database optimization, cloud deployment workflows, and release practices designed for reliable iteration."
+  },
+  {
+    "year": "2021",
+    "title": "Full-Stack Application Delivery",
+    "subtitle": "APIs, Authentication & Data Modeling",
+    "description": "Expanded into end-to-end application ownership, connecting modern frontends to secure APIs, authentication flows, relational and document databases, and dependable server-side business logic."
+  },
+  {
+    "year": "2020",
+    "title": "Frontend Product Engineering",
+    "subtitle": "Responsive Interfaces & Design Systems",
+    "description": "Started delivering polished, responsive product interfaces with a strong focus on component architecture, accessibility, interaction design, and consistent behavior across devices."
+  }
+]
