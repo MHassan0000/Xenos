@@ -1,4 +1,4 @@
-import { files, childrenOf, getFile, normalizePath } from "./filesystem";
+import { childrenOf, getFile, normalizePath, allFiles } from "./filesystem";
 import { profile, projects, skills } from "../data/portfolio";
 import { isApp, launchable, type AppId } from "./registry";
 export const commands = [
@@ -15,6 +15,13 @@ export const commands = [
   "open",
   "neofetch",
   "date",
+  "tree",
+  "whoami",
+  "uname",
+  "echo",
+  "fortune",
+  "man",
+  "games",
 ];
 export type CommandResult = {
   output: string;
@@ -32,12 +39,51 @@ export function runCommand(input: string, cwd: string): CommandResult {
   const target = arg === "~" ? "/" : normalizePath(arg || ".", cwd);
   const file = getFile(target);
   switch (cmd) {
+    case "tree":
+      return {
+        output: allFiles()
+          .filter((f) => f.path.startsWith(target))
+          .map(
+            (f) =>
+              "  ".repeat(Math.max(0, f.path.split("/").length - 2)) +
+              (f.type === "folder" ? "▸ " : "  ") +
+              f.name,
+          )
+          .join("\n"),
+      };
+    case "whoami":
+      return { output: profile.name + " · hassan@desktop" };
+    case "uname":
+      return { output: "Personal desktop 2.0 · Browser environment" };
+    case "echo":
+      return { output: arg };
+    case "fortune":
+      return {
+        output: [
+          "Make it work. Make it clear. Make it feel right.",
+          "The best interface gets out of your way.",
+          "Small details make a desktop feel like home.",
+        ][Math.floor(Math.random() * 3)],
+      };
+    case "man":
+      return {
+        output:
+          arg === "hassan"
+            ? `${profile.name}\n\n${profile.bio}\n\nCONTACT\n${profile.email}`
+            : "Try: man hassan · help · open games",
+      };
+    case "games":
+      return {
+        output:
+          "DOOM · Night Drive · Solitaire · Chess · 2048 · Brickfall · Mines · Snake\nTry: open doom",
+        open: { app: "games" },
+      };
     case undefined:
       return { output: "" };
     case "help":
       return {
         output:
-          "EXPLORE\n  about       Meet Hassan\n  projects    List all 29 projects & workflows\n  skills      Read the technology stack\n  contact     Email & social links\n\nNAVIGATE\n  ls [path]   List a folder\n  cd <path>   Change folder (.. goes up, ~ goes home)\n  cat <file>  Read a portfolio document\n  pwd         Current folder\n  open <app, project or file>\n\nEXTRAS\n  neofetch    About this workspace\n  date        Current date in Lahore\n  clear       Clear the terminal\n\n↑ / ↓ history · Tab completion · Quotes work for paths with spaces",
+          "EXPLORE\n  about       Meet Hassan\n  projects    List all 29 projects & workflows\n  skills      Read the technology stack\n  contact     Email & social links\n  man hassan  Read the profile manual\n  games       Open the game library\n\nNAVIGATE\n  ls [path]   List a folder\n  cd <path>   Change folder (.. goes up, ~ goes home)\n  cat <file>  Read a portfolio document\n  tree [path] Show the folder tree\n  pwd         Current folder\n  open <app, project or file>\n\nEXTRAS\n  neofetch    About this workspace\n  whoami      Workspace owner\n  uname       Environment information\n  echo <text> Print text\n  fortune     A small thought\n  date        Current date in Lahore\n  clear       Clear the terminal\n\n↑ / ↓ history · Tab completion · Quotes work for paths with spaces",
       };
     case "about":
       return {
@@ -109,6 +155,16 @@ export function runCommand(input: string, cwd: string): CommandResult {
           open: { app: "project", arg: p.id },
         };
       if (file && arg) {
+        if (file.type === "app" && file.target && isApp(file.target))
+          return {
+            output: `Opening ${file.name}…`,
+            open: { app: file.target },
+          };
+        if (file.type === "local")
+          return {
+            output: `Opening ${file.name}…`,
+            open: { app: "editor", arg: file.target },
+          };
         if (file.type === "link") return { output: file.target || "" };
         return {
           output: `Opening ${file.name}…`,
@@ -131,7 +187,7 @@ export function runCommand(input: string, cwd: string): CommandResult {
     }
     case "neofetch":
       return {
-        output: `  ╲ ╱   hassan@xenos\n   ╳    ───────────────────────\n  ╱ ╲   Xenos 1.0 · Personal Edition\n        Owner: ${profile.name}\n        Location: ${profile.location}\n        Shell: Portfolio terminal\n        Projects: ${projects.length}\n        Environment: Your web browser\n\nA virtual workspace. No access to your computer’s files.`,
+        output: `  ╲ ╱   hassan@desktop\n   ╳    ───────────────────────\n  ╱ ╲   Personal desktop 2.0 · Personal Edition\n        Owner: ${profile.name}\n        Location: ${profile.location}\n        Shell: Portfolio terminal\n        Projects: ${projects.length}\n        Environment: Your web browser\n\nA virtual workspace. No access to your computer’s files.`,
       };
     case "date":
       return {

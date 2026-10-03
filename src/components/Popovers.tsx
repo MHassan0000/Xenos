@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { registry, launchable, type AppId } from "../core/registry";
 import { projects, skills, profile } from "../data/portfolio";
-import { files } from "../core/filesystem";
-import { Icon, XenosMark } from "./Icon";
+import { allFiles } from "../core/filesystem";
+import { Icon, DesktopMark } from "./Icon";
 export function Popover({
   children,
   className,
@@ -28,7 +29,7 @@ export function Popover({
       if (previous?.isConnected) previous.focus({ preventScroll: true });
     };
   }, []);
-  return (
+  return createPortal(
     <>
       <div className="popover-scrim" onPointerDown={close} />
       <div
@@ -64,7 +65,8 @@ export function Popover({
       >
         {children}
       </div>
-    </>
+    </>,
+    document.querySelector(".desktop") || document.body,
   );
 }
 export function Launcher({
@@ -179,15 +181,15 @@ export function Search({
       app: "project" as const,
       arg: p.id,
     })),
-    ...files
-      .filter((f) => f.type === "document")
+    ...allFiles()
+      .filter((f) => f.type === "document" || f.type === "local")
       .map((f) => ({
         key: f.path,
         title: f.name,
         detail: "Documents · " + (f.content?.slice(0, 160) || ""),
         icon: "file",
-        app: "document" as const,
-        arg: f.path,
+        app: (f.type === "local" ? "editor" : "document") as AppId,
+        arg: f.type === "local" ? f.target : f.path,
       })),
     ...skills.map((s) => ({
       key: s.name,
@@ -205,11 +207,11 @@ export function Search({
       : candidates.slice(0, 7)
   ).slice(0, 25);
   return (
-    <Popover className="search-popover" label="Search Xenos" close={close}>
+    <Popover className="search-popover" label="Search Desktop" close={close}>
       <div className="global-search-input">
         <Icon name="search" size={23} />
         <input
-          aria-label="Search Xenos"
+          aria-label="Search Desktop"
           placeholder="Search apps, projects, technologies…"
           value={query}
           onChange={(e) => {
@@ -282,7 +284,7 @@ export function Search({
         <span>
           <kbd>↵</kbd> to open
         </span>
-        <XenosMark />
+        <DesktopMark />
       </footer>
     </Popover>
   );

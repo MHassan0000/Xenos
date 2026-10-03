@@ -5,6 +5,9 @@ import "@fontsource/jetbrains-mono/400.css";
 import Desktop from "./Desktop";
 import "./styles.css";
 import "./styles/refinements.css";
+import "./styles/desktop.css";
+import "./styles/utilities.css";
+import "./styles/games.css";
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { failed: boolean }
@@ -21,7 +24,7 @@ class ErrorBoundary extends React.Component<
         <button
           onClick={() => {
             try {
-              localStorage.removeItem("xenos:v1:session");
+              localStorage.removeItem("workspace:v2:session");
             } catch {
               /* unavailable */
             }

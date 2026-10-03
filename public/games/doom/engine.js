@@ -1,0 +1,19 @@
+// Original browser adapter, 2026-10-03. Licensed GPL-2.0 with the DOOM engine.
+// Engine: id Software / WebAssembly port: Cornelius Diekmann. See LICENSE.txt and source.zip.
+(() => {
+ const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),message=document.querySelector('#message');
+ const memory=new WebAssembly.Memory({initial:108}),pixels=ctx.createImageData(640,400);let engine,frame=0,paused=false,pauseAt=0,pausedTime=0,origin=performance.now(),ready=false;const held=new Set();
+ const codes={ArrowLeft:172,ArrowUp:173,ArrowRight:174,ArrowDown:175,Control:157,Shift:182,Alt:184,Enter:13,Escape:27,Tab:9,' ':32,Backspace:127};
+ const keycode=key=>codes[key]??(key.length===1?key.toLowerCase().charCodeAt(0):null);
+ function key(code,down){if(!ready||code===null)return;if(down){if(held.has(code))return;held.add(code);}else{if(!held.has(code))return;held.delete(code);}engine.add_browser_event(down?0:1,code);}
+ function release(){for(const code of [...held])key(code,false);}
+ function loop(){if(paused||!ready)return;try{engine.doom_loop_step();frame=requestAnimationFrame(loop);}catch(error){message.style.display='grid';message.textContent='The engine stopped. Use Restart to try again.';ready=false;}}
+ function setPaused(next){if(paused===next)return;paused=next;if(next){pauseAt=performance.now();cancelAnimationFrame(frame);release();}else{pausedTime+=performance.now()-pauseAt;if(ready)frame=requestAnimationFrame(loop);}}
+ document.addEventListener('keydown',e=>{if(e.key==='F8'){e.preventDefault();release();parent.postMessage({type:'desktop-doom-release'},location.origin);return;}const code=keycode(e.key);if(code!==null){e.preventDefault();e.stopPropagation();key(code,true);}});document.addEventListener('keyup',e=>{const code=keycode(e.key);if(code!==null){e.preventDefault();e.stopPropagation();key(code,false);}});
+ window.addEventListener('blur',release);document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);});
+ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='desktop-doom')setPaused(!!e.data.paused);});
+ canvas.addEventListener('pointerdown',e=>{window.focus();document.body.focus();if(e.pointerType==='mouse'){canvas.setPointerCapture(e.pointerId);key(e.button===2?32:157,true);}});canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);canvas.addEventListener('contextmenu',e=>e.preventDefault());
+ for(const [name,code] of [['←',172],['↑',173],['↓',175],['→',174],['FIRE',157],['USE',32],['ENTER',13],['ESC',27]]){const b=document.createElement('button');b.textContent=name;b.setAttribute('aria-label',name);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key(code,true);});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>key(code,false));b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')key(code,true);});b.addEventListener('keyup',()=>key(code,false));document.querySelector('#controls').append(b);}
+ async function boot(){try{const response=await fetch('doom.wasm');if(!response.ok)throw new Error('Engine file unavailable');const module=await WebAssembly.instantiate(await response.arrayBuffer(),{env:{memory},js:{js_console_log:()=>{},js_stdout:()=>{},js_stderr:()=>{},js_milliseconds_since_start:()=>Math.max(0,(paused?pauseAt:performance.now())-origin-pausedTime),js_draw_screen:ptr=>{pixels.data.set(new Uint8Array(memory.buffer,ptr,640*400*4));ctx.putImageData(pixels,0,0);}}});engine=module.instance.exports;origin=performance.now();pausedTime=0;if(paused)pauseAt=origin;engine.main();ready=true;message.style.display='none';if(!paused)frame=requestAnimationFrame(loop);document.body.focus();}catch(error){message.textContent='Could not load DOOM. Close the app and try again. '+error.message;}}
+ boot();
+})();

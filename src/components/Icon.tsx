@@ -46,6 +46,33 @@ import {
   Link,
   ZoomIn,
   ZoomOut,
+  Gamepad2,
+  Skull,
+  CarFront,
+  Club,
+  Crown,
+  Blocks,
+  Bomb,
+  Worm,
+  PencilLine,
+  Calculator,
+  Activity,
+  Trash2,
+  Music2,
+  Volume2,
+  VolumeX,
+  Wifi,
+  WifiOff,
+  Bell,
+  BellOff,
+  Power,
+  LockKeyhole,
+  LogOut,
+  Play,
+  Pause,
+  Save,
+  Download,
+  Plus,
   type LucideIcon,
 } from "lucide-react";
 const icons: Record<string, LucideIcon> = {
@@ -96,6 +123,33 @@ const icons: Record<string, LucideIcon> = {
   link: Link,
   zoomIn: ZoomIn,
   zoomOut: ZoomOut,
+  gamepad: Gamepad2,
+  skull: Skull,
+  car: CarFront,
+  cards: Club,
+  chess: Crown,
+  blocks: Blocks,
+  bomb: Bomb,
+  snake: Worm,
+  edit: PencilLine,
+  calculator: Calculator,
+  activity: Activity,
+  trash: Trash2,
+  music: Music2,
+  volume: Volume2,
+  mute: VolumeX,
+  wifi: Wifi,
+  offline: WifiOff,
+  bell: Bell,
+  dnd: BellOff,
+  power: Power,
+  lock: LockKeyhole,
+  logout: LogOut,
+  play: Play,
+  pause: Pause,
+  save: Save,
+  download: Download,
+  plus: Plus,
 };
 export function Icon({
   name,
@@ -109,7 +163,7 @@ export function Icon({
   const C = icons[name] || FileText;
   return <C size={size} strokeWidth={1.65} aria-hidden="true" {...props} />;
 }
-export function XenosMark({ className = "" }: { className?: string }) {
+export function DesktopMark({ className = "" }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -119,7 +173,26 @@ export function XenosMark({ className = "" }: { className?: string }) {
       fill="none"
       aria-hidden="true"
     >
-      <path d="M7 8h8l18 24h-8zM25 8h8L15 32H7z" fill="currentColor" />
+      <rect x="6" y="6" width="11" height="11" rx="3" fill="currentColor" />
+      <rect
+        x="23"
+        y="6"
+        width="11"
+        height="11"
+        rx="3"
+        fill="currentColor"
+        opacity=".65"
+      />
+      <rect
+        x="6"
+        y="23"
+        width="11"
+        height="11"
+        rx="3"
+        fill="currentColor"
+        opacity=".65"
+      />
+      <rect x="23" y="23" width="11" height="11" rx="3" fill="currentColor" />
     </svg>
   );
 }

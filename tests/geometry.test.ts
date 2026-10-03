@@ -10,9 +10,9 @@ test("saved windows fit smaller viewports and keep all controls reachable", () =
   const area = workArea(800, 600);
   const r = fitRect({ x: 1400, y: 900, w: 1100, h: 900 }, area);
   assert.equal(r.x, 8);
-  assert.equal(r.y, 44);
+  assert.equal(r.y, 8);
   assert.equal(r.w, 784);
-  assert.equal(r.h, 474);
+  assert.equal(r.h, 536);
 });
 test("snapping splits the work area with a gap without modifying restore geometry", () => {
   const area = workArea(1440, 900);

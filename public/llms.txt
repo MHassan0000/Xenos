@@ -1,11 +1,11 @@
-# Xenos — Muhammad Hassan Yousaf
+# Desktop — Muhammad Hassan Yousaf
 
 > Personal portfolio of a full-stack engineer and AI automation architect based in Lahore, Pakistan.
 
 ## Portfolio
 
 - [Accessible portfolio](/portfolio.html): Biography, all 29 projects and workflows, skills, engineering journey, and contact links. Available without JavaScript.
-- [Xenos desktop](/): Interactive browser desktop with a project library, résumé, virtual files, and portfolio terminal.
+- [Interactive desktop](/): Browser desktop with a project library, résumé, virtual files, and portfolio terminal.
 - [Original portfolio](https://hassanyousaf.vercel.app): Primary source for personal information and project content.
 
 ## Contact

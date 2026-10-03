@@ -1,113 +1,75 @@
 import { useDesktop } from "../core/context";
 import { profile, projects } from "../data/portfolio";
-import { Icon, XenosMark } from "../components/Icon";
+import { AppIcon } from "../components/Popovers";
+import { Icon } from "../components/Icon";
+import type { AppId } from "../core/registry";
+const links: [AppId, string, string][] = [
+  ["projects", "Projects", `${projects.length} applications & workflows`],
+  ["resume", "Résumé", "My background and journey"],
+  ["contact", "Get in touch", "Email, GitHub & LinkedIn"],
+  ["skills", "Skills", "The tools behind the work"],
+  ["terminal", "Terminal", "Try help or neofetch"],
+  ["games", "Take a break", "DOOM, racing, chess & more"],
+];
 export default function About() {
-  const { open } = useDesktop();
+  const { open, prefs, setPrefs } = useDesktop();
   return (
-    <div className="about-layout">
-      <aside className="about-sidebar">
-        <div className="avatar">
-          hy
+    <div className="welcome-app scroll-area">
+      <header className="welcome-heading">
+        <div className="welcome-avatar">
+          HY
           <span />
         </div>
-        <strong>{profile.name}</strong>
-        <span className="muted small">Engineer. Maker. Builder.</span>
-        <div className="sidebar-divider" />
-        <span className="eyebrow">MY WORKSPACE</span>
-        <button className="side-link selected" onClick={() => open("about")}>
-          <Icon name="home" />
-          Overview
-        </button>
-        <button className="side-link" onClick={() => open("projects")}>
-          <Icon name="folder" />
-          Selected work<span className="count">{projects.length}</span>
-        </button>
-        <button className="side-link" onClick={() => open("skills")}>
-          <Icon name="cpu" />
-          My toolkit
-        </button>
-        <button className="side-link" onClick={() => open("resume")}>
-          <Icon name="file" />
-          The journey
-        </button>
-        <button className="side-link" onClick={() => open("contact")}>
-          <Icon name="mail" />
-          Get in touch
-        </button>
-        <div className="sidebar-bottom">
-          <Icon name="pin" size={14} /> {profile.location}
-          <br />
-          <span>hassan@xenos ~</span>
-        </div>
-      </aside>
-      <div className="about-main">
-        <div className="about-hero">
-          <div className="eyebrow">
-            <span className="accent-line" /> WELCOME TO MY CORNER OF THE
-            INTERNET
-          </div>
-          <div className="hero-heading">
-            <h1>
-              Good ideas.
-              <br />
-              <span>Built to life.</span>
-            </h1>
-            <div className="hero-emblem">
-              <XenosMark />
-              <span>
-                PERSONAL
-                <br />
-                EDITION / 01
-              </span>
-            </div>
-          </div>
-          <p className="about-intro">
-            Hey, I’m {profile.shortName}.<span className="wave"> ✳</span>
-          </p>
-          <p className="about-copy">
-            {profile.title}.
+        <div>
+          <div className="eyebrow">WELCOME TO MY DESKTOP</div>
+          <h1>Hey, I’m Hassan.</h1>
+          <p>
+            {profile.title}
             <br />
-            {profile.welcome}
+            <span className="welcome-location">
+              <Icon name="pin" size={12} />
+              {profile.location}
+            </span>
           </p>
-          <div className="button-row">
-            <button className="button primary" onClick={() => open("projects")}>
-              <Icon name="folder" size={17} />
-              Explore my work
-            </button>
-            <button className="button" onClick={() => open("contact")}>
-              <Icon name="mail" size={17} />
-              Let’s talk
-            </button>
-          </div>
         </div>
-        <div className="welcome-links">
-          <button onClick={() => open("projects")}>
-            <Icon name="folder" />
+      </header>
+      <p className="welcome-description">
+        I build web and mobile apps, and automate the work around them. This is
+        my little corner of the internet. Open a folder, explore a project, or
+        stay for a game.
+      </p>
+      <div className="welcome-apps">
+        {links.map(([app, label, detail]) => (
+          <button key={app} onClick={() => open(app)}>
+            <AppIcon app={app} />
             <span>
-              <strong>Projects</strong>
-              <small>{projects.length} builds to explore</small>
+              <strong>{label}</strong>
+              <small>{detail}</small>
             </span>
-            <Icon name="right" size={16} />
+            <Icon name="right" size={14} />
           </button>
-          <button onClick={() => open("resume")}>
-            <Icon name="file" />
-            <span>
-              <strong>Résumé</strong>
-              <small>The story so far</small>
-            </span>
-            <Icon name="right" size={16} />
-          </button>
-        </div>
-        <div className="welcome-foot">
-          <span>
-            <Icon name="command" size={13} /> Make yourself at home. This
-            desktop is yours to explore.
-          </span>
-          <a href="/portfolio.html">
-            Simple view <Icon name="external" size={12} />
-          </a>
-        </div>
+        ))}
       </div>
+      <div className="welcome-tip">
+        <Icon name="info" size={15} />
+        <span>
+          Make yourself at home. Drag windows, right-click the desktop, or
+          search with <kbd>Ctrl K</kbd>.
+        </span>
+      </div>
+      <footer className="welcome-bottom">
+        <label>
+          <input
+            type="checkbox"
+            checked={prefs.welcome}
+            onChange={(e) => setPrefs({ welcome: e.target.checked })}
+          />{" "}
+          Show at login
+        </label>
+        <a href="/portfolio.html">
+          Just here for the portfolio <Icon name="external" size={12} />
+        </a>
+      </footer>
     </div>
   );
 }

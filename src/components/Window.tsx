@@ -11,6 +11,7 @@ import {
   type Mode,
 } from "../core/geometry";
 import { Icon } from "./Icon";
+import { Popover } from "./Popovers";
 type Props = {
   win: WindowState;
   active: boolean;
@@ -39,6 +40,7 @@ export function Window({
   const cleanup = useRef<() => void>(() => {});
   const [snap, setSnap] = useState<Mode | null>(null);
   const [moving, setMoving] = useState(false);
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
   const meta = registry[win.app];
   const title =
     win.app === "project"
@@ -172,15 +174,30 @@ export function Window({
       >
         <header
           className="titlebar"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setMenu({
+              x: Math.min(e.clientX, innerWidth - 245),
+              y: Math.min(e.clientY, innerHeight - 290),
+            });
+          }}
           onPointerDown={(e) => start(e)}
           onDoubleClick={(e) => {
             if (!(e.target as HTMLElement).closest("button")) maximize();
           }}
         >
           <div className="window-caption">
-            <span className={`mini-icon ${meta.color}`}>
+            <button
+              className={`mini-icon ${meta.color}`}
+              aria-label={`Window menu for ${title}`}
+              onClick={(e) => {
+                const b = e.currentTarget.getBoundingClientRect();
+                setMenu({ x: b.left, y: b.bottom + 10 });
+              }}
+            >
               <Icon name={meta.icon} size={15} />
-            </span>
+            </button>
             <span>{title}</span>
             {win.app === "about" && (
               <span className="title-dim">— Hassan’s workspace</span>
@@ -221,6 +238,62 @@ export function Window({
             />
           ))}
       </section>
+      {menu && !win.minimized && (
+        <Popover
+          label={`${title} window menu`}
+          className="context-menu"
+          close={() => setMenu(null)}
+          style={{ left: menu.x, top: menu.y }}
+        >
+          <span className="context-title">{title}</span>
+          <button
+            onClick={() => {
+              minimize();
+              setMenu(null);
+            }}
+          >
+            <Icon name="minus" />
+            Minimize
+          </button>
+          <button
+            onClick={() => {
+              maximize();
+              setMenu(null);
+            }}
+          >
+            <Icon name="square" />
+            {win.mode === "normal" ? "Maximize" : "Restore"}
+          </button>
+          <button
+            onClick={() => {
+              update({ mode: "left" });
+              setMenu(null);
+            }}
+          >
+            <Icon name="left" />
+            Snap left
+          </button>
+          <button
+            onClick={() => {
+              update({ mode: "right" });
+              setMenu(null);
+            }}
+          >
+            <Icon name="right" />
+            Snap right
+          </button>
+          <hr />
+          <button
+            onClick={() => {
+              close();
+              setMenu(null);
+            }}
+          >
+            <Icon name="close" />
+            Close window
+          </button>
+        </Popover>
+      )}
     </>
   );
 }

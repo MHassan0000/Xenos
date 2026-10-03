@@ -1,8 +1,10 @@
 import { profile, projects, skills, journey } from "../data/portfolio";
+import { getDocuments } from "./localFiles";
+import { gameIds, registry } from "./registry";
 export type FileNode = {
   path: string;
   name: string;
-  type: "folder" | "document" | "project" | "image" | "link";
+  type: "folder" | "document" | "project" | "image" | "link" | "app" | "local";
   content?: string;
   target?: string;
 };
@@ -17,6 +19,15 @@ export const files: FileNode[] = [
   folder("/Documents"),
   folder("/Pictures"),
   folder("/Links"),
+  folder("/Games"),
+  folder("/Downloads"),
+  ...gameIds.map((id) => ({
+    path: `/Games/${registry[id].name}`,
+    name: registry[id].name,
+    type: "app" as const,
+    target: id,
+    content: registry[id].description,
+  })),
   {
     path: "/Documents/About.md",
     name: "About.md",
@@ -82,10 +93,24 @@ export function normalizePath(path: string, cwd = "/") {
   }
   return "/" + parts.join("/");
 }
+export const allFiles = (): FileNode[] => [
+  ...files,
+  ...getDocuments()
+    .filter((d) => !d.deleted)
+    .map((d) => ({
+      path: `/Documents/${d.name}`,
+      name: d.name,
+      type: "local" as const,
+      content: d.content,
+      target: d.id,
+    })),
+];
 export const getFile = (path: string) =>
-  files.find((f) => f.path.toLowerCase() === normalizePath(path).toLowerCase());
+  allFiles().find(
+    (f) => f.path.toLowerCase() === normalizePath(path).toLowerCase(),
+  );
 export const childrenOf = (path: string) =>
-  files.filter(
+  allFiles().filter(
     (f) =>
       f.path !== "/" &&
       f.path.slice(0, f.path.lastIndexOf("/")) === (path === "/" ? "" : path),

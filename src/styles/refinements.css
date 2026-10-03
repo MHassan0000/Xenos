@@ -51,7 +51,7 @@
 .task-switcher small {
   font-size: 10px;
   display: block;
-  color: #99b6a5;
+  color: #aaaaae;
   margin-top: 4px;
 }
 .task-switcher button > svg {
@@ -84,8 +84,14 @@
   font-size: 14px;
   max-width: 450px;
 }
-.clock-location, .desktop-signature, .desktop-signature span { color: #8aa193; }
-.hero-emblem > span { color: #94b39d; }
+.clock-location,
+.desktop-signature,
+.desktop-signature span {
+  color: #97979b;
+}
+.hero-emblem > span {
+  color: #a5a5a9;
+}
 .project-card h3 {
   font-size: 18px;
 }
@@ -94,7 +100,7 @@
 }
 .card-tech {
   font-size: 9px;
-  color: #99b5a4;
+  color: #a9a9ad;
 }
 .side-link,
 .explorer-sidebar .side-link {
@@ -119,7 +125,7 @@
 }
 .sidebar-note span,
 .file-item small {
-  color: #91b29a;
+  color: #a3a3a7;
 }
 @container (min-width: 1150px) {
   .project-grid:not(.project-list) {

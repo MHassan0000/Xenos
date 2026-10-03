@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 await mkdir(".qa", { recursive: true });
@@ -8,7 +8,7 @@ const context = await browser.newContext({
   permissions: ["clipboard-read", "clipboard-write"],
 });
 const page = await context.newPage();
-const origin = process.env.XENOS_TEST_URL || "http://127.0.0.1:5173";
+const origin = process.env.DESKTOP_TEST_URL || "http://127.0.0.1:5173";
 const errors = [],
   failed = [],
   checks = [];
@@ -31,14 +31,18 @@ const win = (id) => page.locator(`[data-window="${id}"]`);
 const button = (name) => page.getByRole("button", { name, exact: true });
 async function launcher(name) {
   await button("Open application launcher").click();
-  await page
-    .getByRole("dialog", { name: "Application launcher" })
-    .getByRole("button", { name, exact: true })
+  const menu = page.getByRole("dialog", { name: "Application launcher" });
+  await menu.getByRole("textbox", { name: "Search applications" }).fill(name);
+  await menu
+    .locator(".menu-apps > button")
+    .filter({
+      has: page.locator("strong", { hasText: new RegExp("^" + name + "$") }),
+    })
     .click();
 }
 async function search(query) {
   await button("Search apps and projects").click();
-  await page.getByRole("combobox", { name: "Search Xenos" }).fill(query);
+  await page.getByRole("combobox", { name: "Search Desktop" }).fill(query);
   await page.keyboard.press("Enter");
 }
 async function geometry(id) {
@@ -226,13 +230,27 @@ try {
     "Terminal virtual paths, read, list, errors, history, completion, neofetch and app opening",
   );
   await button("Project — 2 open").click();
-  await page.getByRole("dialog", { name: "Open windows" }).getByRole("button", { name: /Oraclex/ }).click();
-  assert.ok(await win("project:oraclex").evaluate(el => el.classList.contains("active")));
+  await page
+    .getByRole("dialog", { name: "Open windows" })
+    .getByRole("button", { name: /Oraclex/ })
+    .click();
+  assert.ok(
+    await win("project:oraclex").evaluate((el) =>
+      el.classList.contains("active"),
+    ),
+  );
   check("Taskbar window picker switches between multiple project windows");
   await launcher("System Info");
-  await win("skills").getByRole("button", { name: "Technologies", exact: true }).click();
-  assert.equal(await win("skills").locator(".skill-groups .tags span").count(), 27);
-  await win("skills").getByRole("button", { name: "Experience", exact: true }).click();
+  await win("skills")
+    .getByRole("button", { name: "Technologies", exact: true })
+    .click();
+  assert.equal(
+    await win("skills").locator(".skill-groups .tags span").count(),
+    27,
+  );
+  await win("skills")
+    .getByRole("button", { name: "Experience", exact: true })
+    .click();
   assert.equal(await win("skills").locator(".timeline-entry").count(), 6);
   check("System Info exposes all skill groups and verified journey entries");
   await launcher("Settings");
@@ -249,17 +267,11 @@ try {
   assert.equal(await page.locator(".wallpaper-aurora").count(), 1);
   assert.equal(await page.locator(".reduce-motion").count(), 1);
   assert.match(
-    await page.evaluate(() => localStorage.getItem("xenos:v1:prefs")),
+    await page.evaluate(() => localStorage.getItem("workspace:v2:prefs")),
     /blue/,
   );
   assert.ok(await win("project:axon").count());
   check("Appearance settings and multiwindow session survive reload");
-  await page
-    .locator(".dock-app")
-    .filter({ has: page.locator(".app-icon.slate") })
-    .last()
-    .click()
-    .catch(() => {});
   if (!(await win("settings").isVisible())) await search("Settings");
   else await win("settings").locator(".titlebar").click();
   await win("settings")
@@ -294,7 +306,7 @@ try {
   await button("Reset desktop").click();
   await win("about").waitFor();
   assert.equal(await page.locator(".os-window").count(), 1);
-  assert.equal(await page.locator(".wallpaper-contour").count(), 1);
+  assert.equal(await page.locator(".wallpaper-midnight").count(), 1);
   assert.equal(await page.locator(".reduce-motion").count(), 0);
   check("Reset restores defaults and window state");
   await page.getByRole("button", { name: /^Clock and calendar/ }).click();
@@ -309,19 +321,19 @@ try {
   await page.mouse.click(1250, 580, { button: "right" });
   await page
     .getByRole("dialog", { name: "Desktop menu" })
-    .getByRole("button", { name: "Hide shortcuts" })
+    .getByRole("button", { name: "Hide desktop icons" })
     .click();
   assert.equal(await page.locator(".desktop-shortcuts").count(), 0);
   await page.mouse.click(1250, 580, { button: "right" });
   await page
     .getByRole("dialog", { name: "Desktop menu" })
-    .getByRole("button", { name: "Show shortcuts" })
+    .getByRole("button", { name: "Show desktop icons" })
     .click();
   check("Desktop context menu actions");
   await page.keyboard.press("Control+k");
   assert.ok(
     await page
-      .getByRole("combobox", { name: "Search Xenos" })
+      .getByRole("combobox", { name: "Search Desktop" })
       .evaluate((el) => el === document.activeElement),
   );
   await page.keyboard.press("ArrowDown");
@@ -345,7 +357,7 @@ try {
   await page.setViewportSize({ width: 1024, height: 768 });
   for (const el of await page.locator(".os-window:visible").all()) {
     const b = await el.boundingBox();
-    assert.ok(b.x >= 0 && b.y >= 35 && b.x + b.width <= 1025);
+    assert.ok(b.x >= 0 && b.y >= 0 && b.x + b.width <= 1025);
   }
   await page.screenshot({ path: ".qa/tablet.png" });
   check("Tablet viewport keeps titlebars and controls reachable");
@@ -353,8 +365,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(100);
   await page.setViewportSize({ width: 1024, height: 768 });
-  await page.waitForTimeout(150);
-  assert.deepEqual(await geometry("contact"), tabletRect);
+  await expect.poll(() => geometry("contact")).toEqual(tabletRect);
   check("Mobile presentation preserves desktop window geometry");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(origin + "/#/about");
@@ -364,11 +375,13 @@ try {
   assert.equal(mobile.x, 0);
   assert.ok(
     await win("about")
-      .getByRole("button", { name: "Explore my work" })
+      .getByRole("button", { name: "Projects 29 applications & workflows" })
       .isVisible(),
   );
   await page.screenshot({ path: ".qa/mobile-welcome.png" });
-  await win("about").getByRole("button", { name: "Explore my work" }).click();
+  await win("about")
+    .getByRole("button", { name: "Projects 29 applications & workflows" })
+    .click();
   await page.screenshot({ path: ".qa/mobile-projects.png" });
   assert.equal(
     await page.evaluate(
@@ -402,12 +415,17 @@ try {
   assert.equal(await fallback.locator(".project").count(), 29);
   await noJs.close();
   check("Full portfolio works without JavaScript");
-  await page.goto(origin);
+  // Seed storage outside the running desktop so its session persistence cannot
+  // overwrite the deliberately invalid record while navigation begins.
+  await page.goto(origin + "/portfolio.html");
   await page.evaluate(() => {
-    localStorage.setItem("xenos:v1:session", '[{"app":"evil","rect":null}]');
-    localStorage.setItem("xenos:v1:prefs", "null");
+    localStorage.setItem(
+      "workspace:v2:session",
+      '[{"app":"evil","rect":null}]',
+    );
+    localStorage.setItem("workspace:v2:prefs", "null");
   });
-  await page.reload();
+  await page.goto(origin);
   await win("about").waitFor();
   assert.equal(await page.locator(".os-window").count(), 1);
   check("Malformed saved state safely falls back to defaults");

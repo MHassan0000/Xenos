@@ -5,6 +5,7 @@ import {
   accents,
   defaults,
   getPreferences,
+  readStorage,
   saveStorage,
   STORAGE_KEY,
   type Preferences,
@@ -12,59 +13,92 @@ import {
 import { DesktopContext } from "./core/context";
 import { Window } from "./components/Window";
 import { Application } from "./apps";
-import { Icon, XenosMark } from "./components/Icon";
-import {
-  AppIcon,
-  Launcher,
-  Search,
-  Calendar,
-  Popover,
-} from "./components/Popovers";
+import { Icon, DesktopMark } from "./components/Icon";
+import { AppIcon, Search, Calendar, Popover } from "./components/Popovers";
+import { AppMenu } from "./components/AppMenu";
+import { DesktopIcons } from "./components/DesktopIcons";
 import { projects, profile } from "./data/portfolio";
-type Overlay = "launcher" | "search" | "calendar" | null;
-const shortcuts: AppId[] = [
-  "about",
-  "projects",
-  "resume",
-  "contact",
-  "files",
-  "terminal",
-];
-const pinned: AppId[] = [
-  "about",
-  "projects",
-  "files",
-  "terminal",
-  "resume",
-  "contact",
-  "settings",
-];
+type Overlay =
+  | "launcher"
+  | "search"
+  | "calendar"
+  | "network"
+  | "volume"
+  | "notifications"
+  | null;
+type Screen = "desktop" | "lock" | "boot" | "off";
+const pinned: AppId[] = ["files", "browser", "terminal", "editor"];
 export default function Desktop() {
   const [prefs, updatePrefs] = useState(getPreferences);
   const wm = useWindows(prefs.restore);
   const [overlay, setOverlay] = useState<Overlay>(null);
+  const [screen, setScreen] = useState<Screen>("desktop");
   const [taskGroup, setTaskGroup] = useState<AppId | null>(null);
-  const [context, setContext] = useState<{ x: number; y: number } | null>(null);
-  const [selection, setSelection] = useState<AppId | null>(null);
+  const [context, setContext] = useState<{
+    x: number;
+    y: number;
+    app?: AppId;
+    arg?: string;
+  } | null>(null);
   const [now, setNow] = useState(new Date());
+  const [online, setOnline] = useState(navigator.onLine);
+  const [visible, setVisible] = useState(!document.hidden);
+  useEffect(() => {
+    const update = () => setVisible(!document.hidden);
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
   const [toast, setToast] = useState("");
+  const [notifications, setNotifications] = useState<
+    { message: string; time: string }[]
+  >(() => {
+    const saved = readStorage<unknown>(STORAGE_KEY + ":notifications", []);
+    return Array.isArray(saved)
+      ? saved
+          .filter(
+            (v) =>
+              v && typeof v.message === "string" && typeof v.time === "string",
+          )
+          .slice(0, 30)
+      : [];
+  });
+  useEffect(() => {
+    saveStorage(STORAGE_KEY + ":notifications", notifications);
+  }, [notifications]);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
-  const [full, setFull] = useState(false);
+  const [iconVersion, setIconVersion] = useState(0);
   const closeMenus = useCallback(() => {
     setOverlay(null);
     setContext(null);
     setTaskGroup(null);
   }, []);
-  const notify = useCallback((message: string) => {
-    setToast(message);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 3500);
-  }, []);
   const setPrefs = useCallback(
     (patch: Partial<Preferences>) => updatePrefs((p) => ({ ...p, ...patch })),
     [],
+  );
+  const notify = useCallback(
+    (message: string) => {
+      setNotifications((n) =>
+        [
+          {
+            message,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+          ...n,
+        ].slice(0, 30),
+      );
+      if (!prefs.dnd) {
+        setToast(message);
+        clearTimeout(toastTimer.current);
+        toastTimer.current = setTimeout(() => setToast(""), 3500);
+      }
+    },
+    [prefs.dnd],
   );
   useEffect(() => {
     saveStorage(STORAGE_KEY + ":prefs", prefs);
@@ -72,7 +106,7 @@ export default function Desktop() {
       try {
         localStorage.removeItem(STORAGE_KEY + ":session");
       } catch {
-        /* private storage */
+        /* private mode */
       }
     }
   }, [prefs]);
@@ -86,53 +120,37 @@ export default function Desktop() {
     [wm.open, closeMenus],
   );
   useEffect(() => {
-    function route() {
-      let path: string[];
+    const route = () => {
+      let p: string[];
       try {
-        path = decodeURIComponent(location.hash.replace(/^#\/?/, "")).split(
-          "/",
-        );
+        p = decodeURIComponent(location.hash.replace(/^#\/?/, "")).split("/");
       } catch {
         return;
       }
-      const app = path.shift();
-      if (app && isApp(app)) {
-        const arg = path.join("/") || undefined;
-        wm.open(app, arg);
-      } else if (!app) wm.open("about");
+      const app = p.shift();
+      if (app && isApp(app)) wm.open(app, p.join("/") || undefined);
+      else if (!app && prefs.welcome) wm.open("about");
       closeMenus();
-    }
+    };
     if (location.hash) route();
-    window.addEventListener("hashchange", route);
-    window.addEventListener("popstate", route);
+    else if (!prefs.welcome) wm.close("about");
+    addEventListener("hashchange", route);
+    addEventListener("popstate", route);
     return () => {
-      window.removeEventListener("hashchange", route);
-      window.removeEventListener("popstate", route);
+      removeEventListener("hashchange", route);
+      removeEventListener("popstate", route);
     };
-  }, [wm.open, closeMenus]);
+  }, [wm.open, wm.close, closeMenus]);
   useEffect(() => {
-    // No seconds are displayed; update once per minute boundary.
-    const tick = () => setNow(new Date());
-    let timer: ReturnType<typeof setInterval> | undefined;
-    const align = setTimeout(
-      () => {
-        tick();
-        timer = setInterval(tick, 60000);
-      },
-      60000 - (Date.now() % 60000),
-    );
-    const onVisible = () => {
-      if (!document.hidden) tick();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    const onFull = () => setFull(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", onFull);
+    const timer = setInterval(() => setNow(new Date()), 10000);
+    const net = () => setOnline(navigator.onLine);
+    addEventListener("online", net);
+    addEventListener("offline", net);
     return () => {
       clearInterval(timer);
-      clearTimeout(align);
-      document.removeEventListener("visibilitychange", onVisible);
       clearTimeout(toastTimer.current);
-      document.removeEventListener("fullscreenchange", onFull);
+      removeEventListener("online", net);
+      removeEventListener("offline", net);
     };
   }, []);
   useEffect(() => {
@@ -143,19 +161,27 @@ export default function Desktop() {
         : active
           ? registry[active.app].name
           : null;
-    document.title = `${name ? name + " · " : ""}Xenos — ${profile.name}`;
+    document.title = `${name ? name + " · " : ""}${profile.name} — Personal desktop`;
   }, [wm.active, wm.windows]);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      const editing = target.matches('input,textarea,[contenteditable="true"]');
+      const edit = (e.target as HTMLElement).matches(
+        'input,textarea,[contenteditable="true"]',
+      );
+      if (screen !== "desktop") {
+        if (e.key === "Enter" || e.key === "Escape") {
+          e.preventDefault();
+          setScreen("desktop");
+        }
+        return;
+      }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setOverlay((o) => (o === "search" ? null : "search"));
         setContext(null);
       }
       if (e.key === "Escape") closeMenus();
-      if (!editing && e.altKey && e.shiftKey && e.key.toLowerCase() === "d") {
+      if (!edit && e.altKey && e.shiftKey && e.key.toLowerCase() === "d") {
         e.preventDefault();
         wm.desktop();
         closeMenus();
@@ -163,352 +189,437 @@ export default function Desktop() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [wm.desktop, closeMenus]);
-  async function fullscreen() {
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else await document.documentElement.requestFullscreen();
-    } catch {
-      notify("Fullscreen is unavailable in this browser.");
+  }, [screen, wm.desktop, closeMenus]);
+  useEffect(() => {
+    if (screen !== "boot") return;
+    const t = setTimeout(() => setScreen("desktop"), 1800);
+    return () => clearTimeout(t);
+  }, [screen]);
+  useEffect(() => {
+    if (screen !== "desktop") {
+      requestAnimationFrame(() =>
+        document
+          .querySelector<HTMLButtonElement>(".session-screen button")
+          ?.focus(),
+      );
     }
-  }
+  }, [screen]);
+  const power = useCallback(
+    (action: "lock" | "logout" | "restart" | "off") => {
+      closeMenus();
+      if (action === "logout" || action === "restart") wm.reset();
+      setScreen(
+        action === "off" ? "off" : action === "restart" ? "boot" : "lock",
+      );
+    },
+    [closeMenus, wm.reset],
+  );
   function reset() {
     updatePrefs({ ...defaults });
     wm.reset();
     closeMenus();
+    setIconVersion((v) => v + 1);
+    saveStorage(STORAGE_KEY + ":icons", {});
     history.replaceState(null, "", location.pathname);
   }
+  const toggle = (next: Overlay) => {
+    setContext(null);
+    setTaskGroup(null);
+    setOverlay((o) => (o === next ? null : next));
+  };
   const dockApps = [
     ...pinned,
     ...wm.windows
       .map((w) => w.app)
-      .filter((app, i, arr) => !pinned.includes(app) && arr.indexOf(app) === i),
+      .filter((app, i, a) => !pinned.includes(app) && a.indexOf(app) === i),
   ];
-  const current = wm.windows.find((w) => w.id === wm.active);
+  function menu(e: React.MouseEvent, app?: AppId, arg?: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMenus();
+    setContext({
+      x: Math.max(8, Math.min(e.clientX, innerWidth - 250)),
+      y: Math.max(8, Math.min(e.clientY, innerHeight - 370)),
+      app,
+      arg,
+    });
+  }
   return (
-    <DesktopContext.Provider value={{ open, notify, prefs, setPrefs, reset }}>
+    <DesktopContext.Provider
+      value={{
+        open,
+        notify,
+        prefs,
+        setPrefs,
+        reset,
+        windows: wm.windows,
+        closeWindow: wm.close,
+        focusWindow: wm.focus,
+        power,
+      }}
+    >
       <main
         className={`desktop wallpaper-${prefs.wallpaper} ${prefs.motion ? "" : "reduce-motion"}`}
         style={{ "--accent": accents[prefs.accent] } as React.CSSProperties}
-        aria-label="Xenos desktop"
+        aria-label="Hassan’s desktop"
         onContextMenu={(e) => {
           if (
-            (e.target as HTMLElement).closest(
-              ".os-window,.popover,.dock,.top-panel",
+            !(e.target as HTMLElement).closest(
+              ".os-window,.popover,.system-panel",
             )
           )
-            return;
-          e.preventDefault();
-          setOverlay(null);
-          setContext({
-            x: Math.min(e.clientX, innerWidth - 245),
-            y: Math.min(e.clientY, innerHeight - 330),
-          });
+            menu(e);
         }}
       >
         <a className="skip-link" href="/portfolio.html">
           Skip desktop — view portfolio
         </a>
         <div className="wallpaper" aria-hidden="true">
-          <div className="wallpaper-glow" />
-          <svg
-            className="contour-lines"
-            viewBox="0 0 1500 1000"
-            preserveAspectRatio="xMidYMid slice"
-          >
-            {Array.from({ length: 27 }, (_, i) => (
-              <ellipse
-                key={i}
-                cx="1210"
-                cy="460"
-                rx={230 + i * 32}
-                ry={130 + i * 25}
-                transform="rotate(-32 1210 460)"
-              />
-            ))}
-          </svg>
-          <span className="wallpaper-wordmark">xenos</span>
+          <div className="ambient-halo" />
+          <div className="obsidian-orbit orbit-one" />
+          <div className="obsidian-orbit orbit-two" />
+          <div className="obsidian-orbit orbit-three" />
+          <div className="wallpaper-grain" />
         </div>
-        <header className="top-panel">
-          <div className="top-left">
-            <button
-              className="brand-button"
-              aria-label="Xenos application menu"
-              aria-expanded={overlay === "launcher"}
-              onClick={() =>
-                setOverlay((o) => (o === "launcher" ? null : "launcher"))
-              }
-            >
-              <XenosMark />
-              <strong>xenos</strong>
-            </button>
-            <span className="panel-divider" />
-            <span className="active-app-label">
-              {current ? registry[current.app].name : "Desktop"}
-            </span>
-          </div>
-          <div className="top-right">
-            <a className="simple-view" href="/portfolio.html">
-              <Icon name="globe" size={13} />
-              Simple view
-            </a>
-            <span className="panel-location">
-              <Icon name="pin" size={13} />
-              Lahore, PK
-            </span>
-            <button
-              className="panel-clock"
-                aria-label={`Clock and calendar — ${now.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" })} ${now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`}
-              aria-expanded={overlay === "calendar"}
-              onClick={() =>
-                setOverlay((o) => (o === "calendar" ? null : "calendar"))
-              }
-            >
-              <span>
-                {now.toLocaleDateString("en-GB", {
-                  weekday: "short",
-                  day: "2-digit",
-                  month: "short",
-                })}
-              </span>
-              {" "}
-              <strong>
-                {now.toLocaleTimeString("en-GB", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </strong>
-            </button>
-            <button
-              className="panel-icon"
-              aria-label={full ? "Exit fullscreen" : "Enter fullscreen"}
-              title={full ? "Exit fullscreen" : "Enter fullscreen"}
-              onClick={fullscreen}
-            >
-              <Icon name="fullscreen" size={15} />
-            </button>
-          </div>
-        </header>
         <div
           className="desktop-surface"
-          inert={wm.area.w <= 704 && !!wm.active}
+          inert={screen !== "desktop" || (wm.area.w <= 704 && !!wm.active)}
           onPointerDown={(e) => {
-            if (e.target === e.currentTarget) {
-              setSelection(null);
-              closeMenus();
-            }
+            if (e.target === e.currentTarget) closeMenus();
           }}
         >
           {prefs.icons && (
-            <nav className="desktop-shortcuts" aria-label="Desktop shortcuts">
-              {shortcuts.map((app, i) => (
-                <button
-                  key={app}
-                  className={`desktop-shortcut ${selection === app ? "selected" : ""}`}
-                  aria-label={`Open ${app === "about" ? "About me" : registry[app].name}`}
-                  title={`Double-click to open ${registry[app].name}`}
-                  onClick={(e) => {
-                    setSelection(app);
-                    if (
-                      e.detail === 0 ||
-                      window.matchMedia("(pointer: coarse)").matches ||
-                      innerWidth <= 720
-                    )
-                      open(app);
-                  }}
-                  onDoubleClick={() => open(app)}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                      e.preventDefault();
-                      const buttons =
-                        e.currentTarget.parentElement?.querySelectorAll(
-                          "button",
-                        );
-                      buttons?.[
-                        (i +
-                          (e.key === "ArrowDown" ? 1 : -1) +
-                          shortcuts.length) %
-                          shortcuts.length
-                      ]?.focus();
-                    }
-                  }}
-                >
-                  <AppIcon app={app} />
-                  <span>
-                    {app === "about" ? "About me" : registry[app].name}
-                  </span>
-                </button>
-              ))}
-            </nav>
+            <DesktopIcons open={open} version={iconVersion} onMenu={menu} />
           )}
-          <div className="desktop-clock" aria-hidden="true">
-            <div className="eyebrow">A LITTLE SPACE TO CREATE.</div>
-            <div className="large-clock">
-              {now.toLocaleTimeString("en-GB", {
-                hour: "2-digit",
-                minute: "2-digit",
-                timeZone: "Asia/Karachi",
-              })}
-            </div>
-            <div className="desktop-date">
-              {now.toLocaleDateString("en-GB", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                timeZone: "Asia/Karachi",
-              })}
-            </div>
-            <div className="clock-location">
-              <Icon name="pin" size={12} />
-              LAHORE, PAKISTAN
-            </div>
+          <div className="desktop-identity" aria-hidden="true">
+            <span>HASSAN YOUSAF</span>
+            <small>ENGINEER / MAKER / EXPLORER</small>
           </div>
-          <div className="desktop-signature" aria-hidden="true">
-            <XenosMark />
-            <div>
-              XENOS<span>PERSONAL EDITION / 1.0</span>
-            </div>
+          {prefs.sticky && (
+            <aside className="desktop-note">
+              <button
+                aria-label="Hide desktop note"
+                onClick={() => setPrefs({ sticky: false })}
+              >
+                <Icon name="close" size={14} />
+              </button>
+              <span className="eyebrow">A FEW THINGS TO EXPLORE</span>
+              <p>
+                My work lives in{" "}
+                <button onClick={() => open("projects")}>Projects</button>.
+                <br />
+                My story starts in{" "}
+                <button onClick={() => open("about")}>Welcome</button>.<br />
+                And yes, it runs{" "}
+                <button onClick={() => open("doom")}>DOOM</button>.
+              </p>
+              <small>
+                Make yourself at home. <span>— H.</span>
+              </small>
+            </aside>
+          )}
+          <div className="desktop-edition">
+            <span className="status-dot" /> PERSONAL WORKSPACE <span>/</span>{" "}
+            LAHORE, PK
           </div>
         </div>
-        {wm.windows.map((win, i) => (
-          <Window
-            key={win.id}
-            win={win}
-            active={win.id === wm.active}
-            z={100 + i * 2}
-            area={wm.area}
-            focus={() => wm.focus(win.id)}
-            close={() => {
-              wm.close(win.id);
-              if (win.id === wm.active)
-                history.replaceState(null, "", location.pathname);
-            }}
-            minimize={() => wm.minimize(win.id)}
-            maximize={() => wm.toggleMax(win.id)}
-            update={(patch) => wm.update(win.id, patch)}
+        <div inert={screen !== "desktop"}>
+          {wm.windows.map((win, i) => (
+            <Window
+              key={win.id}
+              win={win}
+              active={win.id === wm.active}
+              z={100 + i * 2}
+              area={wm.area}
+              focus={() => wm.focus(win.id)}
+              close={() => {
+                wm.close(win.id);
+                if (win.id === wm.active)
+                  history.replaceState(null, "", location.pathname);
+              }}
+              minimize={() => wm.minimize(win.id)}
+              maximize={() => wm.toggleMax(win.id)}
+              update={(patch) => wm.update(win.id, patch)}
+            >
+              <Application
+                win={win}
+                active={
+                  visible &&
+                  screen === "desktop" &&
+                  !overlay &&
+                  !context &&
+                  !taskGroup &&
+                  win.id === wm.active &&
+                  !win.minimized
+                }
+              />
+            </Window>
+          ))}
+        </div>
+        <nav
+          className="system-panel"
+          aria-label="Taskbar"
+          inert={screen !== "desktop"}
+        >
+          <button
+            className={`panel-launcher ${overlay === "launcher" ? "selected" : ""}`}
+            aria-label="Open application launcher"
+            aria-expanded={overlay === "launcher"}
+            onClick={() => toggle("launcher")}
           >
-            <Application win={win} />
-          </Window>
-        ))}
-        <div className="desktop-bottom">
-          <div className="session-label">
-            <span className="mini-avatar">hy</span>
-            <div>
-              {profile.shortName}’s workspace
-              <small>Full-stack & AI automation</small>
-            </div>
-          </div>
-          <nav className="dock" aria-label="Taskbar">
-            <button
-              className={`dock-launcher ${overlay === "launcher" ? "running-active" : ""}`}
-              aria-label="Open application launcher"
-              aria-expanded={overlay === "launcher"}
-              onClick={() =>
-                setOverlay((o) => (o === "launcher" ? null : "launcher"))
-              }
-            >
-              <XenosMark />
-              <span className="dock-tooltip">Applications</span>
-            </button>
-            <button
-              className="dock-search"
-              aria-label="Search apps and projects"
-              aria-expanded={overlay === "search"}
-              onClick={() =>
-                setOverlay((o) => (o === "search" ? null : "search"))
-              }
-            >
-              <Icon name="search" size={24} />
-              <span className="dock-tooltip">
-                Search <kbd>⌘ K</kbd>
-              </span>
-            </button>
-            <span className="dock-divider" />
+            <DesktopMark />
+            <span>Applications</span>
+          </button>
+          <button
+            className="panel-search"
+            aria-label="Search apps and projects"
+            onClick={() => toggle("search")}
+          >
+            <Icon name="search" size={18} />
+          </button>
+          <span className="panel-rule" />
+          <div className="panel-tasks">
             {dockApps.map((app) => {
               const wins = wm.windows.filter((w) => w.app === app);
               const active = wins.some((w) => w.id === wm.active);
               return (
                 <button
                   key={app}
-                  className={`dock-app ${wins.length ? "running" : ""} ${active ? "running-active" : ""}`}
+                  className={`task-button ${wins.length ? "running" : ""} ${active ? "active" : ""}`}
                   aria-label={`${registry[app].name}${wins.length ? ` — ${wins.length} open` : ""}`}
                   aria-pressed={active}
+                  title={registry[app].name}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    closeMenus();
+                    setTaskGroup(app);
+                  }}
                   onClick={() => {
                     closeMenus();
-                    if (!wins.length) {
-                      open(app);
-                      return;
-                    }
-                    if (wins.length > 1) {
-                      setTaskGroup(app);
-                      return;
-                    }
-                    if (active) {
-                      const target = wins.find((w) => w.id === wm.active)!;
-                      wm.minimize(target.id);
-                    } else {
-                      const target =
-                        wins.find((w) => w.minimized) || wins.at(-1)!;
-                      wm.focus(target.id);
-                      history.pushState(
-                        null,
-                        "",
-                        `#/${target.app}${target.arg ? "/" + encodeURIComponent(target.arg) : ""}`,
-                      );
-                    }
+                    if (!wins.length) open(app);
+                    else if (wins.length > 1) setTaskGroup(app);
+                    else if (active) wm.minimize(wins[0].id);
+                    else wm.focus(wins[0].id);
                   }}
                 >
                   <AppIcon app={app} />
-                  <span className="dock-tooltip">
-                    {registry[app].name}
-                    {wins.length > 1 ? ` (${wins.length})` : ""}
-                  </span>
-                  <span className="running-indicator" />
+                  {wins.length > 1 && <small>{wins.length}</small>}
+                  <span className="task-label">{registry[app].name}</span>
                 </button>
               );
             })}
-          </nav>
+          </div>
+          <div className="system-tray">
+            <button
+              title={online ? "Connected to the internet" : "Offline"}
+              aria-label="Network"
+              onClick={() => toggle("network")}
+            >
+              <Icon name={online ? "wifi" : "offline"} size={17} />
+            </button>
+            <button
+              title={`Volume ${prefs.volume}%`}
+              aria-label="Volume"
+              onClick={() => toggle("volume")}
+            >
+              <Icon name={prefs.volume ? "volume" : "mute"} size={17} />
+            </button>
+            <button
+              title="Notifications"
+              aria-label="Notifications"
+              onClick={() => toggle("notifications")}
+            >
+              <Icon name={prefs.dnd ? "dnd" : "bell"} size={17} />
+              {notifications.length > 0 && <i />}
+            </button>
+            <button
+              className="panel-clock"
+              aria-label="Clock and calendar"
+              onClick={() => toggle("calendar")}
+            >
+              <strong>
+                {now.toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </strong>
+              <span>
+                {now.toLocaleDateString("en-GB", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                })}
+              </span>
+            </button>
+          </div>
           <button
-            className="show-desktop"
+            className="panel-desktop"
+            title="Show desktop"
             aria-label="Show desktop or restore windows"
             onClick={() => {
               wm.desktop();
               closeMenus();
             }}
-          >
-            <Icon name="monitor" size={18} />
-            <span>Show desktop</span>
-          </button>
-        </div>
-        {overlay === "launcher" && (
-          <Launcher
-            open={open}
-            close={closeMenus}
-            search={() => setOverlay("search")}
           />
-        )}
+        </nav>
+        {overlay === "launcher" && <AppMenu close={closeMenus} />}
         {overlay === "search" && <Search open={open} close={closeMenus} />}
         {overlay === "calendar" && <Calendar now={now} close={closeMenus} />}
+        {overlay === "network" && (
+          <Popover label="Network" className="tray-menu" close={closeMenus}>
+            <div className="tray-heading">
+              <Icon name={online ? "wifi" : "offline"} />
+              <h3>{online ? "Connected" : "Offline"}</h3>
+            </div>
+            <p>
+              {online
+                ? "Your browser is connected to the internet."
+                : "Local apps and saved notes remain available while this page is open."}
+            </p>
+            <div className="network-detail">
+              <span>Connection</span>
+              <strong>{online ? "Online" : "Offline"}</strong>
+              <span>Workspace</span>
+              <strong>This browser</strong>
+            </div>
+            <p className="small muted">
+              Wi-Fi networks are managed by your device.
+            </p>
+            <button className="button" onClick={() => open("browser")}>
+              Open Web Browser
+            </button>
+          </Popover>
+        )}
+        {overlay === "volume" && (
+          <Popover label="Sound" className="tray-menu" close={closeMenus}>
+            <div className="tray-heading">
+              <Icon name="volume" />
+              <h3>Sound</h3>
+              <strong>{prefs.volume}%</strong>
+            </div>
+            <label className="volume-slider">
+              <button
+                aria-label={prefs.volume ? "Mute" : "Unmute"}
+                onClick={() => setPrefs({ volume: prefs.volume ? 0 : 35 })}
+              >
+                <Icon name={prefs.volume ? "volume" : "mute"} />
+              </button>
+              <input
+                aria-label="Workspace volume"
+                type="range"
+                min="0"
+                max="100"
+                value={prefs.volume}
+                onChange={(e) => setPrefs({ volume: +e.target.value })}
+              />
+            </label>
+            <p className="small muted">
+              Controls Ambient and desktop game sounds.
+            </p>
+            <button className="button" onClick={() => open("music")}>
+              <Icon name="music" size={15} /> Open Ambient
+            </button>
+          </Popover>
+        )}
+        {overlay === "notifications" && (
+          <Popover
+            label="Notifications"
+            className="tray-menu notification-menu"
+            close={closeMenus}
+          >
+            <div className="tray-heading">
+              <h3>Notifications</h3>
+              <button
+                className="text-button"
+                disabled={!notifications.length}
+                onClick={() => setNotifications([])}
+              >
+                Clear all
+              </button>
+            </div>
+            <label className="notification-dnd">
+              <span>Do not disturb</span>
+              <input
+                type="checkbox"
+                checked={prefs.dnd}
+                onChange={(e) => setPrefs({ dnd: e.target.checked })}
+              />
+            </label>
+            {notifications.length ? (
+              notifications.map((n, i) => (
+                <article key={i}>
+                  <Icon name="info" size={17} />
+                  <p>
+                    {n.message}
+                    <small>{n.time}</small>
+                  </p>
+                  <button
+                    aria-label="Dismiss notification"
+                    onClick={() =>
+                      setNotifications((ns) => ns.filter((_, j) => j !== i))
+                    }
+                  >
+                    <Icon name="close" size={13} />
+                  </button>
+                </article>
+              ))
+            ) : (
+              <div className="notification-empty">
+                <Icon name="bell" size={28} />
+                <p>You’re all caught up.</p>
+                <small>Your workspace updates will appear here.</small>
+              </div>
+            )}
+          </Popover>
+        )}
         {context && (
           <Popover
             label="Desktop menu"
             className="context-menu"
-            style={{
-              left: Math.max(8, context.x),
-              top: Math.max(44, context.y),
-            }}
+            style={{ left: context.x, top: context.y }}
             close={closeMenus}
           >
-            <span className="context-title">XENOS DESKTOP</span>
+            <span className="context-title">
+              {context.app ? registry[context.app].name : "DESKTOP"}
+            </span>
+            {context.app && (
+              <button onClick={() => open(context.app!, context.arg)}>
+                <Icon name="external" />
+                Open
+              </button>
+            )}
             <button onClick={() => open("files")}>
-              <Icon name="files" />
-              Open Files
+              <Icon name="folder" />
+              Open Home
             </button>
             <button onClick={() => open("terminal")}>
               <Icon name="terminal" />
               Open Terminal
             </button>
+            <button onClick={() => open("editor")}>
+              <Icon name="edit" />
+              New document
+            </button>
             <hr />
+            <button
+              onClick={() => {
+                setIconVersion((v) => v + 1);
+                saveStorage(STORAGE_KEY + ":icons", {});
+                closeMenus();
+              }}
+            >
+              <Icon name="grid" />
+              Arrange desktop icons
+            </button>
+            <button
+              onClick={() => {
+                setPrefs({ icons: !prefs.icons });
+                closeMenus();
+              }}
+            >
+              <Icon name="eye" />
+              {prefs.icons ? "Hide" : "Show"} desktop icons
+            </button>
             <button
               onClick={() => {
                 wm.desktop();
@@ -518,80 +629,141 @@ export default function Desktop() {
               <Icon name="monitor" />
               Show / restore desktop
             </button>
-            <button
-              onClick={() => {
-                setPrefs({ icons: !prefs.icons });
-                closeMenus();
-              }}
-            >
-              <Icon name="eye" />
-              {prefs.icons ? "Hide" : "Show"} shortcuts
-            </button>
-            <button
-              onClick={() => {
-                setSelection(null);
-                closeMenus();
-                notify("Desktop refreshed");
-              }}
-            >
-              <Icon name="reset" />
-              Refresh desktop
-            </button>
             <hr />
             <button onClick={() => open("settings")}>
               <Icon name="settings" />
-              Personalize
+              Desktop settings
+            </button>
+            <button onClick={() => power("lock")}>
+              <Icon name="lock" />
+              Lock workspace
             </button>
           </Popover>
         )}
         {taskGroup && (
           <Popover
-            className="task-switcher"
             label="Open windows"
+            className="task-switcher"
             close={closeMenus}
           >
-            <span className="eyebrow">OPEN WINDOWS</span>
+            <h3>{registry[taskGroup].name}</h3>
             {wm.windows
               .filter((w) => w.app === taskGroup)
               .map((w) => (
-                <button
-                  key={w.id}
-                  onClick={() => {
-                    open(w.app, w.arg);
-                  }}
-                >
-                  <AppIcon app={w.app} />
-                  <span>
-                    <strong>
+                <div className="task-switch-row" key={w.id}>
+                  <button
+                    onClick={() => {
+                      wm.focus(w.id);
+                      closeMenus();
+                    }}
+                  >
+                    <AppIcon app={w.app} />
+                    <span>
                       {w.app === "project"
                         ? projects.find((p) => p.id === w.arg)?.name
                         : w.arg?.split("/").pop() || registry[w.app].name}
-                    </strong>
-                    <small>
-                      {w.minimized
-                        ? "Minimized"
-                        : w.id === wm.active
-                          ? "Active"
-                          : "Open"}
-                    </small>
-                  </span>
-                  {w.id === wm.active && <Icon name="check" size={16} />}
-                </button>
+                      <small>{w.minimized ? "Minimized" : "Open"}</small>
+                    </span>
+                  </button>
+                  <button
+                    aria-label={`Close ${registry[w.app].name}`}
+                    onClick={() => {
+                      wm.close(w.id);
+                      closeMenus();
+                    }}
+                  >
+                    <Icon name="close" size={15} />
+                  </button>
+                </div>
               ))}
+            <button className="button" onClick={() => open(taskGroup)}>
+              Open {registry[taskGroup].name}
+            </button>
           </Popover>
         )}
-        <div
-          className={`toast ${toast ? "visible" : ""}`}
-          role="status"
-          aria-live="polite"
-        >
-          {toast && (
-            <>
-              <Icon name="info" size={17} />
-              {toast}
-            </>
-          )}
-        </div>
+        {toast && (
+          <div className="desktop-toast" role="status">
+            <Icon name="check" size={16} />
+            {toast}
+            <button aria-label="Dismiss" onClick={() => setToast("")}>
+              <Icon name="close" size={13} />
+            </button>
+          </div>
+        )}
+        {screen !== "desktop" && (
+          <section
+            className={`session-screen session-${screen}`}
+            aria-label={
+              screen === "off"
+                ? "Workspace powered off"
+                : screen === "boot"
+                  ? "Restarting workspace"
+                  : "Workspace locked"
+            }
+          >
+            {screen === "off" ? (
+              <>
+                <button
+                  className="power-on"
+                  aria-label="Power on"
+                  onClick={() => setScreen("boot")}
+                >
+                  <Icon name="power" size={38} />
+                </button>
+                <span>WORKSPACE IS OFF</span>
+                <a href="/portfolio.html">View portfolio</a>
+              </>
+            ) : screen === "boot" ? (
+              <>
+                <DesktopMark />
+                <h2>Preparing your workspace</h2>
+                <div className="boot-progress" />
+                <pre>
+                  Loading personal environment…{"\n"}Mounting portfolio files…
+                  {"\n"}Starting desktop session.
+                </pre>
+                <button className="button" onClick={() => setScreen("desktop")}>
+                  Skip startup
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="lock-clock">
+                  {now.toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+                <p>
+                  {now.toLocaleDateString("en-GB", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+                <div className="lock-user">HY</div>
+                <h2>{profile.name}</h2>
+                <span>Personal workspace · Guest session</span>
+                <button
+                  className="button primary"
+                  onClick={() => setScreen("desktop")}
+                >
+                  Enter desktop <Icon name="right" size={16} />
+                </button>
+                <small>No password needed. Press Enter to continue.</small>
+                <a href="/portfolio.html">Open simple portfolio</a>
+                <div className="lock-actions">
+                  <button aria-label="Restart" onClick={() => power("restart")}>
+                    <Icon name="reset" />
+                  </button>
+                  <button aria-label="Shut down" onClick={() => power("off")}>
+                    <Icon name="power" />
+                  </button>
+                </div>
+              </>
+            )}
+          </section>
+        )}
       </main>
     </DesktopContext.Provider>
   );

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { profile, skills, journey } from "../data/portfolio";
 import { useDesktop } from "../core/context";
-import { Icon, XenosMark } from "../components/Icon";
+import { Icon, DesktopMark } from "../components/Icon";
 import { Tags } from "./Projects";
 export function Resume() {
   const { open } = useDesktop();
@@ -70,7 +70,7 @@ export function Skills() {
     <div className="skills-app scroll-area">
       <div className="system-header">
         <div className="system-mark">
-          <XenosMark />
+          <DesktopMark />
         </div>
         <div>
           <span className="eyebrow">THE HUMAN BEHIND THE SYSTEM</span>

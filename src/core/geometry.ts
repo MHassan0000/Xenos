@@ -8,9 +8,9 @@ export function workArea(
 ): Rect {
   return {
     x: 8,
-    y: 44,
+    y: 8,
     w: Math.max(280, width - 16),
-    h: Math.max(220, height - 126),
+    h: Math.max(220, height - 64),
   };
 }
 export function fitRect(r: Rect, a: Rect): Rect {

@@ -8,14 +8,23 @@ import {
 import { useDesktop } from "../core/context";
 import { Icon } from "../components/Icon";
 import { projects } from "../data/portfolio";
+import { isApp } from "../core/registry";
+import { useDocuments, trashDocument } from "../core/localFiles";
+import { Popover } from "../components/Popovers";
 export default function Files({ initialPath = "/" }: { initialPath?: string }) {
-  const { open } = useDesktop();
+  const { open, notify } = useDesktop();
+  useDocuments();
   const [history, setHistory] = useState([
     getFile(initialPath)?.type === "folder" ? initialPath : "/",
   ]);
   const [cursor, setCursor] = useState(0);
   const [query, setQuery] = useState("");
   const [list, setList] = useState(false);
+  const [context, setContext] = useState<{
+    file: FileNode;
+    x: number;
+    y: number;
+  } | null>(null);
   const path = history[cursor];
   function go(p: string) {
     if (getFile(p)?.type !== "folder") return;
@@ -34,6 +43,8 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
   );
   function launch(f: FileNode) {
     if (f.type === "folder") go(f.path);
+    else if (f.type === "app" && f.target && isApp(f.target)) open(f.target);
+    else if (f.type === "local") open("editor", f.target);
     else if (f.type === "project") open("project", f.target);
     else if (f.type === "image") open("image", f.target);
     else if (f.type === "link")
@@ -109,41 +120,61 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
       <div className="explorer-body">
         <aside className="explorer-sidebar">
           <span className="eyebrow">PLACES</span>
-          {["Home", "Projects", "Documents", "Pictures", "Links"].map(
-            (name) => (
-              <button
-                key={name}
-                className={`side-link ${(name === "Home" ? path === "/" : path === "/" + name) ? "selected" : ""}`}
-                onClick={() => go(name === "Home" ? "/" : "/" + name)}
-              >
-                <Icon
-                  name={
-                    name === "Home"
-                      ? "home"
-                      : name === "Pictures"
-                        ? "image"
-                        : name === "Links"
-                          ? "link"
-                          : name === "Documents"
-                            ? "file"
-                            : "folder"
-                  }
-                  size={17}
-                />
-                {name}
-              </button>
-            ),
-          )}
+          {[
+            "Home",
+            "Projects",
+            "Documents",
+            "Downloads",
+            "Pictures",
+            "Games",
+            "Links",
+          ].map((name) => (
+            <button
+              key={name}
+              className={`side-link ${(name === "Home" ? path === "/" : path === "/" + name) ? "selected" : ""}`}
+              onClick={() => go(name === "Home" ? "/" : "/" + name)}
+            >
+              <Icon
+                name={
+                  name === "Home"
+                    ? "home"
+                    : name === "Pictures"
+                      ? "image"
+                      : name === "Links"
+                        ? "link"
+                        : name === "Documents"
+                          ? "file"
+                          : "folder"
+                }
+                size={17}
+              />
+              {name}
+            </button>
+          ))}
           <div className="sidebar-divider" />
+          <button className="side-link" onClick={() => open("trash")}>
+            <Icon name="trash" size={17} />
+            Trash
+          </button>
           <span className="eyebrow">WORKSPACE</span>
           <div className="virtual-drive">
             <Icon name="monitor" size={25} />
             <div>
-              Xenos Home<small>Portfolio files</small>
+              Personal Home<small>Portfolio & local files</small>
             </div>
           </div>
         </aside>
         <div className="files-main scroll-area">
+          {path === "/Documents" && (
+            <button
+              className="button"
+              style={{ marginBottom: 12 }}
+              onClick={() => open("editor")}
+            >
+              <Icon name="plus" size={14} />
+              New document
+            </button>
+          )}
           <label className="search-field">
             <Icon name="search" size={16} />
             <input
@@ -160,44 +191,69 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
                   ? projects.find((p) => p.id === f.target)
                   : null;
               return (
-                <button
-                  className="file-item"
-                  key={f.path}
-                  onClick={() => launch(f)}
-                  title={p?.name || f.name}
-                >
-                  {f.type === "image" ? (
-                    <img
-                      className="file-thumbnail"
-                      src={f.target}
-                      alt=""
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span
-                      className={`file-icon ${f.type === "folder" ? "amber" : f.type === "project" ? "mint" : "blue"}`}
-                    >
-                      <Icon
-                        name={
-                          f.type === "folder"
-                            ? "folder"
-                            : f.type === "link"
-                              ? "link"
-                              : f.type === "project"
-                                ? "code"
-                                : "file"
-                        }
-                        size={35}
+                <div className="file-entry" key={f.path}>
+                  <button
+                    className="file-item"
+                    key={f.path}
+                    onClick={() => launch(f)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setContext({
+                        file: f,
+                        x: Math.min(e.clientX, innerWidth - 245),
+                        y: Math.min(e.clientY, innerHeight - 210),
+                      });
+                    }}
+                    title={p?.name || f.name}
+                  >
+                    {f.type === "image" ? (
+                      <img
+                        className="file-thumbnail"
+                        src={f.target}
+                        alt=""
+                        loading="lazy"
                       />
-                    </span>
+                    ) : (
+                      <span
+                        className={`file-icon ${f.type === "folder" ? "amber" : f.type === "project" ? "mint" : "blue"}`}
+                      >
+                        <Icon
+                          name={
+                            f.type === "folder"
+                              ? "folder"
+                              : f.type === "app"
+                                ? "gamepad"
+                                : f.type === "link"
+                                  ? "link"
+                                  : f.type === "project"
+                                    ? "code"
+                                    : "file"
+                          }
+                          size={35}
+                        />
+                      </span>
+                    )}
+                    <span>{p?.name || f.name}</span>
+                    <small>
+                      {f.type === "folder"
+                        ? `${childrenOf(f.path).length} items`
+                        : f.type}
+                    </small>
+                  </button>
+                  {f.type === "local" && (
+                    <button
+                      className="local-delete"
+                      aria-label={`Move ${f.name} to Trash`}
+                      onClick={() => {
+                        if (trashDocument(f.target!))
+                          notify(`${f.name} moved to Trash`);
+                      }}
+                    >
+                      <Icon name="trash" size={13} />
+                    </button>
                   )}
-                  <span>{p?.name || f.name}</span>
-                  <small>
-                    {f.type === "folder"
-                      ? `${childrenOf(f.path).length} items`
-                      : f.type}
-                  </small>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -213,6 +269,50 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
         <span>{items.length} items</span>
         <span>~{path === "/" ? "" : path} · Virtual portfolio filesystem</span>
       </footer>
+      {context && (
+        <Popover
+          label="File actions"
+          className="context-menu"
+          close={() => setContext(null)}
+          style={{ left: Math.max(8, context.x), top: Math.max(8, context.y) }}
+        >
+          <span className="context-title">{context.file.name}</span>
+          <button
+            onClick={() => {
+              launch(context.file);
+              setContext(null);
+            }}
+          >
+            <Icon name="external" />
+            Open
+          </button>
+          {context.file.type === "local" && (
+            <button
+              onClick={() => {
+                if (trashDocument(context.file.target!))
+                  notify(`${context.file.name} moved to Trash`);
+                setContext(null);
+              }}
+            >
+              <Icon name="trash" />
+              Move to Trash
+            </button>
+          )}
+          <button
+            onClick={() => {
+              notify(
+                context.file.type === "folder"
+                  ? `${context.file.name}: ${childrenOf(context.file.path).length} items`
+                  : `${context.file.name} · ${context.file.type}${context.file.content ? ` · ${context.file.content.length} characters` : ""}`,
+              );
+              setContext(null);
+            }}
+          >
+            <Icon name="info" />
+            Properties
+          </button>
+        </Popover>
+      )}
     </div>
   );
 }

@@ -1,12 +1,41 @@
-Xenos uses original application code and wallpaper geometry.
+Hassan's personal desktop uses original application code and wallpaper geometry.
 
-Runtime third-party notices are distributed in /licenses/:
-- React: React-MIT.txt
-- React DOM: React-DOM-MIT.txt
-- Lucide icons: Lucide-ISC.txt (includes upstream icon notices)
-- Inter font: Inter-OFL.txt
-- JetBrains Mono font: JetBrains-Mono-OFL.txt
+Runtime notices in /licenses/:
+- React and React DOM: React-MIT.txt, React-DOM-MIT.txt
+- Lucide icons: Lucide-ISC.txt, including upstream icon notices
+- Inter: Inter-OFL.txt
+- JetBrains Mono: JetBrains-Mono-OFL.txt
+- Three.js: Three-MIT.txt (Night Drive rendering)
+- chess.js: Chess-BSD-2-Clause.txt (legal chess rules)
 
-Portfolio project images and workflow diagrams are sourced from the owner's reference portfolio, https://hassanyousaf.vercel.app/ . Their original third-party branding is retained.
+DOOM
+Copyright (C) id Software. The engine is distributed under GNU GPL version 2.
+The original game data remains id Software's shareware game data; the engine's
+GPL does not relicense the game's art, music, maps, or other proprietary data.
+This distribution includes only the upstream embedded shareware episode.
+The WebAssembly port is by Cornelius Diekmann (wasm-fizzbuzz).
+Engine binary was obtained unmodified from iam-medvedev/wasm-doom:
+  https://github.com/iam-medvedev/wasm-doom
+  revision 734a171b95b0e8c9de0d31a8e5ed925116c6cca3
+That project's wasm/README.md identifies wasm-fizzbuzz as the binary source.
+Corresponding port source and build instructions:
+  https://github.com/diekmann/wasm-fizzbuzz/tree/main/doom
+  revision 51a7030bea563d96027301a36619c17347b9270d
+The complete checked-out doom/ source directory is offered as:
+  /games/doom/source.zip
+GPL license: /games/doom/LICENSE.txt
+Original engine source: https://github.com/id-Software/DOOM
+The original browser adapter in /games/doom/engine.js is also supplied under
+GPL-2.0, without warranty, and is available in its editable source form.
+This port removes audio; no audio or persistent game saving is claimed.
 
-Design/interaction references: daedalOS by Dustin Brett (https://dustinbrett.com/) and LithOS by Naji Ullah (https://github.com/Naji-Ullah/lithos). No code or assets from these projects are redistributed.
+Portfolio images and diagrams are sourced from the owner's supplied portfolio,
+https://hassanyousaf.vercel.app/ . Original third-party branding is retained.
+
+Desktop design and interaction references:
+- LithOS by Naji Ullah: https://github.com/Naji-Ullah/lithos
+- daedalOS by Dustin Brett: https://dustinbrett.com/
+No LithOS or daedalOS application code or desktop artwork is redistributed.
+The DOOM binary and source are independently sourced from the upstream projects
+identified above. Night Drive, card-game UI, arcade games and desktop shell are
+independently implemented for this portfolio.

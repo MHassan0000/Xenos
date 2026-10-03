@@ -1,96 +1,85 @@
-# Xenos
+# Hassan’s personal desktop
 
-Muhammad Hassan Yousaf's personal portfolio as an original browser desktop. Built with React 19, TypeScript, Vite, Lucide, Inter, and JetBrains Mono. Dark charcoal surfaces, mint accents, and an original geometric wallpaper.
+A dark, interactive portfolio desktop for Muhammad Hassan Yousaf, based in Lahore, Pakistan. Built with React, TypeScript and Vite. The desktop follows LithOS’s Linux-style layout and interactions, with an original black ambient theme and independently implemented applications.
 
-## Run locally
+## Run
 
-Requires Node.js 22.18+ and npm. Dependencies are already installed in this workspace.
+Requires Node 22.12+ and npm. From this folder:
 
 ```sh
-npm ci
+npm install
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/**. The direct, accessible portfolio is at **/portfolio.html** and works without JavaScript. `predev` regenerates this page from the shared content model.
+Open **http://127.0.0.1:5173**. To serve the production build:
 
 ```sh
 npm run build
 npm run preview
 ```
 
-Production preview runs at **http://127.0.0.1:4173/**. Deploy the `dist/` directory to any static host at the domain root. No environment variables, server, API keys, or account access are required. Hash-based desktop deep links need no rewrite rules. This task prepares the local application; it does not publish to a hosting account.
+Preview runs at **http://127.0.0.1:4173**. Deploy `dist/` to a static host. App routes use URL hashes, so no special server rewrite is required. The plain portfolio is at `/portfolio.html` and works without JavaScript.
 
-## Edit your content
+## Included
 
-- `src/data/portfolio.ts`: name, title, biography, welcome copy, location, contact/social links, and grouped skills.
-- `src/data/projects.json`: all 18 applications and 11 automation workflows, their descriptions, tags, categories, images, demos, and repositories.
-- `src/data/journey.json`: the verified six-stage engineering journey.
-- `public/assets/`: all 33 source screenshots and workflow diagrams, served locally.
-- `index.html`: desktop page metadata and no-JavaScript fallback.
+- A bottom task panel, categorized/searchable launcher, draggable desktop shortcuts, useful desktop/file/window context menus, calendar, notification history, browser network status, shared volume, show-desktop, fullscreen, and lock/logout/restart/shutdown screens.
+- Shared windows with focus, stacking, eight resize handles, minimize/maximize/restore, edge snapping, remembered geometry, grouped task switching, and mobile app views.
+- Welcome, all 29 sourced projects/workflows, résumé/background, skills, contact, Files, image/text viewers and the portfolio terminal.
+- A tabbed Web Browser, local Text Editor, Notes, Calculator, System Monitor, Trash, and three generative Ambient soundscapes.
+- Eight playable games: **DOOM**, **Night Drive** (3D), **Solitaire**, **Chess** (computer/local), **2048**, **Brickfall**, **Mines**, and **Snake**. Games and utilities load on demand; DOOM’s 6.8 MB engine is fetched only after Launch.
 
-Files, search, project details, Terminal, and the standalone portfolio derive their content from these records. After edits, `npm run build` regenerates the standalone portfolio. During development, run `node scripts/static-portfolio.mjs` to refresh it without restarting the server. Do not edit generated `public/portfolio.html` directly.
+## Edit content and appearance
 
-No downloadable CV was present in the source. Résumé displays verified background and the published engineering journey, with a contact route for a current CV. No education, employer, testimonial, or metric was invented. Full research notes are in `docs/RESEARCH.md`.
+| File | Purpose |
+| --- | --- |
+| `src/data/portfolio.ts` | Name, introduction, biography, location, email, profiles, skill groups |
+| `src/data/projects.json` | All project descriptions, categories, tags, images and verified URLs |
+| `src/data/journey.json` | Published engineering journey |
+| `public/assets/` | Optimized portfolio screenshots and diagrams |
+| `src/core/registry.ts` | Application names, icons, categories and default window sizes |
+| `src/core/persistence.ts` | Default wallpaper, accent, motion and desktop preferences |
+| `src/styles/desktop.css` | Black desktop theme, ambient wallpaper, panel, launcher and welcome layout |
+| `src/styles/apps.css`, `utilities.css`, `games.css` | Individual application styling |
 
-## Theme and preferences
+`scripts/static-portfolio.mjs` generates the accessible HTML portfolio from the same content model during development startup and build. Avoid editing `public/portfolio.html` directly.
 
-`src/styles.css` contains the shell, shared tokens, window controls, dock, menus, and responsive desktop rules. `src/styles/apps.css` styles app contents. `src/styles/refinements.css` contains final responsive and readability refinements. `src/core/persistence.ts` defines accent palettes and default preferences; `src/Desktop.tsx` contains the original wallpaper geometry.
+## Architecture and behavior
 
-Settings supports three wallpapers, four accent colors, animations, desktop shortcuts, session restoration, and resetting the desktop. Device reduced-motion preferences always win. Notes remain saved when the desktop is reset. All persistence uses versioned `xenos:v1:*` localStorage keys and handles unavailable or invalid storage.
+`Desktop.tsx` assembles the shell. `core/windows.ts` owns window state; `geometry.ts` handles snapping and bounds. `components/Window.tsx` uses pointer capture and direct geometry updates while dragging/resizing. Applications communicate with the shell through `core/context.ts`.
 
-## Architecture
+`core/filesystem.ts` exposes portfolio folders and game launchers. `core/localFiles.ts` supplies locally saved editor documents to Files, search, Terminal, and Trash. Deletion moves local documents to Trash; permanent deletion requires an in-app confirmation. Filename collisions are resolved automatically.
 
-```
-src/core/registry.ts       App names, icons, colors, default sizes
-src/core/windows.ts       Window lifecycle, focus, stacking, saved sessions
-src/core/geometry.ts      Bounds, snapping, resizing, viewport recovery
-src/core/filesystem.ts    Shared virtual folders, documents, images, links
-src/core/terminal.ts      Virtual command execution and completion
-src/core/persistence.ts   Validated browser-local preferences
-src/components/Window.tsx Pointer gestures and shared window chrome
-src/components/Popovers.tsx Launcher, search, calendar and focus management
-src/apps/                 Purposeful portfolio applications
-src/Desktop.tsx           Shell, taskbar, routing and desktop interactions
-scripts/static-portfolio.mjs  Generates the indexable no-JS portfolio
-```
+Core apps and games are single-instance. Project details, images and portfolio documents have one window per item. Launching an open application raises and restores it. Closing a game ends its in-memory run; best arcade scores persist. Active games pause when switched away from, minimized, or when the page becomes hidden.
 
-Core applications are single-instance: relaunching brings the existing window forward. Each project, image, and document has one window per content ID. Taskbar groups provide a picker when several documents are open. Minimized applications remain mounted to retain their working state. Geometry, stacking order, minimization, and launch arguments persist when session restoration is enabled; transient search queries and Terminal history do not survive reloads. Mobile uses one maximized app at a time while retaining underlying desktop geometry.
+Appearance, desktop icon positions, optional window sessions, notes, editor drafts/documents and best scores use local storage (`workspace:v2`). Invalid records fall back to defaults. **Settings → Desktop → Restore defaults** resets appearance, icons and windows while retaining local documents and notes.
 
-Dragging and resizing use pointer capture and direct element updates, committing React state when the gesture ends. All eight resize handles share bounded geometry logic. Left/right/top edge snapping, titlebar double-click, and maximize/restore preserve prior geometry. Terminal and Notes are lazy-loaded. The clock updates on minute boundaries rather than repainting the desktop continuously.
+## Keyboard
 
-## Controls
-
-- Desktop: single click selects, double click opens; Enter opens focused shortcuts. Touch opens with one tap.
-- Taskbar: launch, switch, minimize, restore, or select a grouped window.
-- Right-click desktop: Files, Terminal, show/restore windows, hide/show shortcuts, refresh, personalization.
-- `Ctrl/⌘ K`: global app/content search, with Up/Down and Enter.
-- `Alt Shift D`: show/restore desktop outside text fields.
+- `Ctrl/Cmd K`: search apps, projects, skills and documents.
+- `Alt Shift D`: show/restore desktop.
 - `Alt Shift M`: maximize/restore the focused window.
-- `Alt Shift Left/Right`: snap the focused window.
-- `Escape`: dismiss menus; keyboard focus returns to the trigger.
-- Terminal: `help`, `about`, `projects`, `skills`, `contact`, `ls`, `cd`, `cat`, `pwd`, `clear`, `open`, `neofetch`, `date`; history, Tab completion, and quoted paths.
+- `Alt Shift ←/→`: snap the focused window.
+- `Escape`: dismiss menus. `Enter`: launch a selected desktop shortcut or enter a locked guest session.
+- Editor: `Ctrl/Cmd S` saves locally. Terminal: arrow history and Tab completion.
+- Games show their controls. DOOM uses `F8` to release keyboard focus to its toolbar.
 
-Example deep links: `/#/projects`, `/#/resume`, `/#/contact`, `/#/project/axon`, `/#/files/%2FDocuments`. Browser Back/Forward follows launches. Direct portfolio permalinks include `/portfolio.html#axon`.
+Terminal commands include `help`, `about`, `projects`, `skills`, `contact`, `ls`, `cd`, `cat`, `pwd`, `tree`, `open`, `neofetch`, `whoami`, `uname`, `echo`, `fortune`, `man hassan`, `games`, `date`, and `clear`.
 
-## Verify
+## Validate
 
 ```sh
 npm test
 npm run test:e2e
+npm run test:apps
 npm run build
 ```
 
-Geometry tests run in Node. The browser walkthrough uses installed Google Chrome through Playwright and expects the dev server on port 5173. To test production on Windows PowerShell after starting `npm run preview`:
+Browser scripts require installed Google Chrome and a running dev/preview server. Set `DESKTOP_TEST_URL` to target another URL. Ignored `.qa/` contains screenshots and structured test results. Chrome DevTools is used separately for direct interaction, responsive screenshots, console and asset inspection.
 
-```powershell
-$env:XENOS_TEST_URL = 'http://127.0.0.1:4173'
-npm run test:e2e
-```
+## Browser limits and credits
 
-Screenshots and structured results are saved to ignored `.qa/`. Tests cover app launches, all 29 projects, clipboard, focus, drag/resize/snap, minimize/maximize/restore, file history, image viewing, Terminal, settings, local notes, reset, browser history, desktop/tablet/phone views, reduced motion, malformed saved state, no-JavaScript access, and runtime/asset failures. Chrome DevTools was also used for reference research, real UI interaction, screenshot reviews, console checks, and Lighthouse accessibility audits.
+This is a browser workspace. Lock/power/network/system-monitor controls operate on this experience and do not control the visitor’s actual computer. There is no authentication, backend, fake message delivery or external upload of local notes.
 
-## Browser boundaries and attribution
+External sites open normally in a browser tab by default. An optional sandboxed preview is offered, but embedding restrictions are respected. Night Drive needs WebGL. The bundled DOOM port is silent, contains only the shareware episode, and does not persist saved games. A genuine downloadable CV was not found in the supplied portfolio; Résumé presents verified published information without inventing a PDF.
 
-This is a portfolio desktop, not access to the visitor's actual operating system. Files are virtual. Notes and preferences stay in this browser; clearing site data removes them. Contact opens the visitor's email application and does not simulate delivery. External project/social links open separate tabs, and may depend on the external service's availability or authentication. Fullscreen is requested only from its explicit control.
-
-No source CV file was provided, so no PDF download is offered. Essential content remains available in the simple portfolio. No boot sequence blocks entry. No LithOS or daedalOS code/assets are copied; see `docs/RESEARCH.md` and `public/THIRD-PARTY-NOTICES.txt`. Included third-party font and library notices ship in `public/licenses/`.
+The LithOS repository had no top-level license grant when inspected; its application code and desktop art are not copied. DOOM is bundled independently from its upstream WebAssembly distribution, with the corresponding engine source archive and GPL license available from the game’s credits. See `public/THIRD-PARTY-NOTICES.txt` for dependencies, attribution and source provenance.

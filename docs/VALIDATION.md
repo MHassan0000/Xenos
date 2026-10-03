@@ -1,42 +1,27 @@
-# Validation — 3 October 2026
+# Desktop revision validation
 
-Validated against the built application at `http://127.0.0.1:4173/` with Google Chrome. Development checks also ran on port 5173. No external publishing was performed.
+The revision is inspected with Chrome DevTools and exercised with the repository’s browser tests. No Lighthouse audit is part of this workflow.
 
-## Automated results
+Final results, 3 October 2026: **35 portfolio/window browser checks, 20 extended application checks, and 9 logic tests passed**. Both browser suites ran against the production preview at `http://127.0.0.1:4173`. No uncaught runtime errors or failed assets were recorded. The TypeScript check and production bundle pass. Vite notes that the optional Three.js racing chunk exceeds 500 kB; it is lazy-loaded and is not part of the initial desktop bundle.
 
-- `npm run build`: passed TypeScript compilation, Vite production bundling, and generation of the static portfolio.
-- `npm test`: four geometry tests passed, covering viewport recovery, snap/restore geometry, minimum resize sizes, and reachable titlebars.
-- `npm run test:e2e` against production: **35 checks passed**. No captured runtime/console errors, failed requests, or HTTP asset errors.
-- `git diff --check`: passed.
-- 29 portfolio records and 33 locally served WebP images verified. Image payload totals approximately 1.05 MiB across the entire archive; most are lazy-loaded.
+The final keyboard refinement was checked directly in Chrome DevTools: dragging a shortcut stores its position and Enter still launches it afterward. The expanded terminal help was verified in the rebuilt production preview. Desktop, tablet, and mobile screenshots and the console/network panels were reviewed separately from the automated suites.
 
-## Browser coverage
+## Coverage
 
-The production walkthrough verifies initial welcome routes; shortcut selection/double-click; launcher and keyboard search; category filtering and project details; verified live/source links and copy actions; multiple-window focus; drag, resize, left edge snap, maximize/restore, titlebar double-click, minimize/taskbar restoration; grouped project window switching; desktop hide/restore; file paths and back/forward history; image viewer opening; 27 skill entries and six journey entries; Terminal navigation, reading, completion, history, errors, and launching; appearance persistence; disabling session restoration; local notes; reset; calendar navigation; context menu actions; browser deep links/back/forward; malformed saved state; and the JavaScript-free portfolio.
+- Original portfolio walkthrough: source content, all 29 projects, search/filtering, verified links, clipboard, Files navigation and images, terminal history/completion, settings/reset, malformed storage, reload, direct routes and browser back/forward.
+- Shared window manager: pointer dragging, resizing, edge snapping, titlebar maximize/restore, taskbar minimize/restore, grouped project windows, focus, show-desktop, viewport bounds and preservation of desktop geometry through mobile views.
+- Added applications: all eight game launches; 2048 movement/undo, safe first Mines reveal/flags/difficulty, Snake pause/minimize, Brickfall locking, chess computer/legal moves/checkmate/undo, Solitaire deal/draw/undo/hints, actual DOOM frame rendering/menu input/pause, and WebGL racing/steering/pause.
+- Local documents: editor save, shared Files listing, trash/restore, search, and reload. Calculator arithmetic/error handling, browser tabs/history/bookmarks/local preview, Ambient and shared volume, task monitor, notifications, network, lock/power/restart.
+- Screenshots at desktop (1440×900), tablet (1024×768), and phone (390×844). Keyboard use, reduced motion, page overflow, console errors and failed assets.
 
-Screenshots reviewed at 1440×900, 1024×768, and 390×844. Mobile uses maximized app surfaces with a touch launcher and scrollable dock. Returning from mobile preserves desktop window dimensions. OS reduced-motion preferences override interface animations.
+## Reproduce
 
-## Chrome DevTools audits
+Start the development server and run `npm test`, `npm run test:e2e`, and `npm run test:apps`. Run `npm run build` for the production typecheck/bundle. To check production, start `npm run preview` and set `DESKTOP_TEST_URL=http://127.0.0.1:4173` when running each browser suite. Browser test artifacts are written under ignored `.qa/`.
 
-Final production desktop snapshot:
+## Deliberate limits
 
-| Category | Score |
-| --- | --- |
-| Accessibility | 100 |
-| Best practices | 100 |
-| SEO | 100 |
-| Agentic browsing | 100 |
-
-The standalone `/portfolio.html` snapshot also scored 100 in each category, with zero failing audits. These are Lighthouse snapshot scores, not a blanket accessibility certification or performance measurement. The desktop report retains an unscored experimental visible-label warning on its live clock. Standard accessibility checks pass; the clock is keyboard-operable and explicitly named with its date/time.
-
-Earlier screenshot/audit findings were corrected: vertically clipped welcome content, an effect returning a browser API value in Terminal, covered mobile windows appearing in navigation, desktop geometry shrinking during phone presentation, and low-contrast decorative labels.
-
-Local screenshots and full walkthrough output are saved in ignored `.qa/`. Run the commands in README to regenerate them.
-
-## Remaining boundaries
-
-- No source CV file was available. Résumé is a readable profile rather than an invented PDF.
-- Contact uses real `mailto:` and verified external links; there is no delivery backend or simulated send success.
-- External demo/repository URLs were extracted from the owner's portfolio. Third-party uptime and sign-in requirements are outside Xenos.
-- Files are virtual; settings and notes remain in local browser storage. Saved app geometry persists, while transient filters and Terminal history reset on reload.
-- Validation used Chromium. Firefox and Safari were not independently exercised in this session.
+- Games are implemented for casual portfolio exploration; best scores persist, full game sessions do not.
+- The selected DOOM engine has no audio or persistent save support. The original shareware episode is playable locally.
+- The browser cannot force external websites to allow embedding. The normal external-link route remains available.
+- System statistics describe this page, and network status is the browser’s online indicator. No fabricated device processes or disk capacity are shown.
+- Local storage can be unavailable or full. Editor errors offer downloading a copy; no cloud save is claimed.

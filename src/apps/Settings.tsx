@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDesktop } from "../core/context";
 import { accents, type Preferences } from "../core/persistence";
-import { Icon, XenosMark } from "../components/Icon";
+import { Icon, DesktopMark } from "../components/Icon";
 export default function Settings() {
   const { prefs, setPrefs, reset, notify } = useDesktop();
   const [tab, setTab] = useState("Appearance");
@@ -13,7 +13,7 @@ export default function Settings() {
         {[
           ["Appearance", "sun"],
           ["Desktop", "monitor"],
-          ["About Xenos", "info"],
+          ["About this desktop", "info"],
         ].map(([t, i]) => (
           <button
             key={t}
@@ -85,6 +85,43 @@ export default function Settings() {
         ) : tab === "Desktop" ? (
           <>
             <Toggle
+              label="Welcome at login"
+              text="Open the welcome window when starting a fresh session."
+              value={prefs.welcome}
+              set={(value) => setPrefs({ welcome: value })}
+            />
+            <Toggle
+              label="Desktop note"
+              text="Show the small introduction note on the desktop."
+              value={prefs.sticky}
+              set={(value) => setPrefs({ sticky: value })}
+            />
+            <Toggle
+              label="Do not disturb"
+              text="Keep notifications in the tray without showing popups."
+              value={prefs.dnd}
+              set={(value) => setPrefs({ dnd: value })}
+            />
+            <section className="setting-section">
+              <h3>Fullscreen workspace</h3>
+              <p>Give your desktop a little more room.</p>
+              <button
+                className="button"
+                onClick={async () => {
+                  try {
+                    if (document.fullscreenElement)
+                      await document.exitFullscreen();
+                    else await document.documentElement.requestFullscreen();
+                  } catch {
+                    notify("Fullscreen is unavailable in this browser.");
+                  }
+                }}
+              >
+                <Icon name="fullscreen" size={15} />
+                Toggle fullscreen
+              </button>
+            </section>
+            <Toggle
               label="Restore my session"
               text="Remember open applications and window positions on this browser."
               value={prefs.restore}
@@ -142,10 +179,10 @@ export default function Settings() {
             </section>
           </>
         ) : (
-          <div className="about-xenos">
-            <XenosMark />
-            <h2>Xenos</h2>
-            <span className="eyebrow">1.0 / PERSONAL EDITION</span>
+          <div className="about-workspace">
+            <DesktopMark />
+            <h2>Hassan’s desktop</h2>
+            <span className="eyebrow">2.0 / PERSONAL WORKSPACE</span>
             <p>
               A personal space for the things I build.
               <br />
@@ -178,6 +215,14 @@ export default function Settings() {
             </div>
             <a className="button" href="/portfolio.html">
               Open simple portfolio
+            </a>
+            <a
+              className="button"
+              href="/THIRD-PARTY-NOTICES.txt"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Software credits & licenses
             </a>
           </div>
         )}

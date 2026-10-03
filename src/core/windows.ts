@@ -88,9 +88,8 @@ export function useWindows(restore: boolean) {
     const onResize = () => {
       const a = workArea();
       setArea(a);
-      if (window.innerWidth > 720) {
-        setWindows((ws) => ws.map((w) => ({ ...w, rect: fitRect(w.rect, a) })));
-      }
+      // Constrain the rendered rectangle, not the user's preferred geometry.
+      // Returning from a small viewport must recover the desktop dimensions.
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);

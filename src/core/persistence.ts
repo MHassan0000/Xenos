@@ -1,5 +1,6 @@
-export const STORAGE_KEY = "xenos:v1";
+export const STORAGE_KEY = "workspace:v2";
 export const accents = {
+  silver: "#d6d8df",
   mint: "#adddcc",
   blue: "#a4c5f9",
   violet: "#c3b5eb",
@@ -11,13 +12,21 @@ export type Preferences = {
   motion: boolean;
   restore: boolean;
   icons: boolean;
+  volume: number;
+  welcome: boolean;
+  sticky: boolean;
+  dnd: boolean;
 };
 export const defaults: Preferences = {
-  accent: "mint",
-  wallpaper: "contour",
+  accent: "silver",
+  wallpaper: "midnight",
   motion: true,
   restore: true,
   icons: true,
+  volume: 35,
+  welcome: true,
+  sticky: true,
+  dnd: false,
 };
 export function readStorage<T>(key: string, fallback: T): T {
   try {
@@ -42,14 +51,22 @@ export function getPreferences(): Preferences {
   );
   if (!data || typeof data !== "object") return { ...defaults };
   return {
-    accent: typeof data.accent === "string" && Object.hasOwn(accents, data.accent)
-      ? data.accent!
-      : defaults.accent,
+    accent:
+      typeof data.accent === "string" && Object.hasOwn(accents, data.accent)
+        ? data.accent!
+        : defaults.accent,
     wallpaper: ["contour", "aurora", "midnight"].includes(data.wallpaper || "")
       ? data.wallpaper!
       : defaults.wallpaper,
     motion: typeof data.motion === "boolean" ? data.motion : true,
     restore: typeof data.restore === "boolean" ? data.restore : true,
     icons: typeof data.icons === "boolean" ? data.icons : true,
+    volume:
+      typeof data.volume === "number" && Number.isFinite(data.volume)
+        ? Math.min(100, Math.max(0, data.volume))
+        : 35,
+    welcome: typeof data.welcome === "boolean" ? data.welcome : true,
+    sticky: typeof data.sticky === "boolean" ? data.sticky : true,
+    dnd: typeof data.dnd === "boolean" ? data.dnd : false,
   };
 }
