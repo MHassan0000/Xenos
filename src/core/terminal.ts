@@ -52,9 +52,9 @@ export function runCommand(input: string, cwd: string): CommandResult {
           .join("\n"),
       };
     case "whoami":
-      return { output: profile.name + " · hassan@desktop" };
+      return { output: `${profile.name}  ·  hassan@xenos` };
     case "uname":
-      return { output: "Personal desktop 2.0 · Browser environment" };
+      return { output: "Xenos OS 1.0 · Personal workspace · Browser environment" };
     case "echo":
       return { output: arg };
     case "fortune":
@@ -185,10 +185,31 @@ export function runCommand(input: string, cwd: string): CommandResult {
         output: `open: ${arg || "(empty)"}: App or file not found. Try "open projects".`,
       };
     }
-    case "neofetch":
-      return {
-        output: `  ╲ ╱   hassan@desktop\n   ╳    ───────────────────────\n  ╱ ╲   Personal desktop 2.0 · Personal Edition\n        Owner: ${profile.name}\n        Location: ${profile.location}\n        Shell: Portfolio terminal\n        Projects: ${projects.length}\n        Environment: Your web browser\n\nA virtual workspace. No access to your computer’s files.`,
-      };
+    case "neofetch": {
+      const art = [
+        "  ██╗  ██╗███████╗███╗   ██╗ ██████╗ ███████╗",
+        "  ╚██╗██╔╝██╔════╝████╗  ██║██╔═══██╗██╔════╝",
+        "   ╚███╔╝ █████╗  ██╔██╗ ██║██║   ██║███████╗",
+        "   ██╔██╗ ██╔══╝  ██║╚██╗██║██║   ██║╚════██║",
+        "  ██╔╝ ██╗███████╗██║ ╚████║╚██████╔╝███████║",
+        "  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝",
+      ].join("\n");
+      const info = [
+        `hassan@xenos`,
+        `─────────────────────────────────────────`,
+        `OS         Xenos OS 1.0 (Personal Edition)`,
+        `Host       Personal Workspace`,
+        `Kernel     6.4.0-xenos`,
+        `Shell      portfolio-shell 1.0`,
+        `DE         Xenos Desktop`,
+        `Theme      Obsidian Midnight`,
+        `Font       Inter Variable + JetBrains Mono`,
+        `Projects   ${projects.length}`,
+        `Location   ${profile.location}`,
+        `Status     Available for interesting work`,
+      ].join("\n");
+      return { output: art + "\n\n" + info + "\n" };
+    }
     case "date":
       return {
         output:

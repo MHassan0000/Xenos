@@ -181,26 +181,19 @@ export default function Settings() {
         ) : (
           <div className="about-workspace">
             <DesktopMark />
-            <h2>Hassan’s desktop</h2>
-            <span className="eyebrow">2.0 / PERSONAL WORKSPACE</span>
+            <h2>Xenos OS</h2>
+            <span className="eyebrow">1.0 / PERSONAL WORKSPACE</span>
             <p>
               A personal space for the things I build.
               <br />
               Designed for exploration. Made for the web.
             </p>
             <p className="muted small">
-              This is a browser-based desktop. Portfolio files are virtual;
-              preferences and notes are stored only in this browser.
+              This is a browser-based desktop environment. Portfolio files are
+              virtual; preferences and notes are stored only in this browser.
             </p>
             <div className="credits">
               <strong>Inspiration</strong>
-              <a
-                href="https://dustinbrett.com/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                daedalOS by Dustin Brett <Icon name="external" size={13} />
-              </a>
               <a
                 href="https://github.com/Naji-Ullah/lithos"
                 target="_blank"
@@ -208,11 +201,32 @@ export default function Settings() {
               >
                 LithOS by Naji Ullah <Icon name="external" size={13} />
               </a>
+              <a
+                href="https://dustinbrett.com/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                daedalOS by Dustin Brett <Icon name="external" size={13} />
+              </a>
               <p>
-                Original implementation. Icons by Lucide. Inter & JetBrains Mono
-                typefaces.
+                Original implementation. Icons by Lucide. Inter &amp; JetBrains
+                Mono typefaces.
               </p>
             </div>
+            <button
+              className="button"
+              onClick={() => {
+                try {
+                  localStorage.removeItem("workspace:v2:booted");
+                } catch {
+                  /* unavailable */
+                }
+                notify("Boot sequence reset — reload the page to experience it again.");
+              }}
+            >
+              <Icon name="reset" size={15} />
+              Re-run boot sequence
+            </button>
             <a className="button" href="/portfolio.html">
               Open simple portfolio
             </a>
@@ -222,7 +236,7 @@ export default function Settings() {
               target="_blank"
               rel="noreferrer"
             >
-              Software credits & licenses
+              Software credits &amp; licenses
             </a>
           </div>
         )}

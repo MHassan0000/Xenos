@@ -18,6 +18,7 @@ import { AppIcon, Search, Calendar, Popover } from "./components/Popovers";
 import { AppMenu } from "./components/AppMenu";
 import { DesktopIcons } from "./components/DesktopIcons";
 import { projects, profile } from "./data/portfolio";
+import { TerminalBoot, LockScreen } from "./components/BootSequence";
 type Overlay =
   | "launcher"
   | "search"
@@ -26,13 +27,15 @@ type Overlay =
   | "volume"
   | "notifications"
   | null;
-type Screen = "desktop" | "lock" | "boot" | "off";
+type Screen = "desktop" | "lock" | "boot" | "off" | "firstboot";
 const pinned: AppId[] = ["files", "browser", "terminal", "editor"];
+const BOOT_DONE_KEY = STORAGE_KEY + ":booted";
 export default function Desktop() {
   const [prefs, updatePrefs] = useState(getPreferences);
   const wm = useWindows(prefs.restore);
   const [overlay, setOverlay] = useState<Overlay>(null);
-  const [screen, setScreen] = useState<Screen>("desktop");
+  const hasBooted = readStorage<boolean>(BOOT_DONE_KEY, false);
+  const [screen, setScreen] = useState<Screen>(hasBooted ? "desktop" : "firstboot");
   const [taskGroup, setTaskGroup] = useState<AppId | null>(null);
   const [context, setContext] = useState<{
     x: number;
@@ -168,6 +171,15 @@ export default function Desktop() {
       const edit = (e.target as HTMLElement).matches(
         'input,textarea,[contenteditable="true"]',
       );
+      /* firstboot handles its own keyboard input — don't intercept */
+      if (screen === "firstboot") return;
+      if (screen === "lock") {
+        if (e.key === "Enter" || e.key === "Escape") {
+          e.preventDefault();
+          setScreen("desktop");
+        }
+        return;
+      }
       if (screen !== "desktop") {
         if (e.key === "Enter" || e.key === "Escape") {
           e.preventDefault();
@@ -192,7 +204,8 @@ export default function Desktop() {
   }, [screen, wm.desktop, closeMenus]);
   useEffect(() => {
     if (screen !== "boot") return;
-    const t = setTimeout(() => setScreen("desktop"), 1800);
+    /* boot triggered by power("restart") — just go to lock after brief delay */
+    const t = setTimeout(() => setScreen("lock"), 2200);
     return () => clearTimeout(t);
   }, [screen]);
   useEffect(() => {
@@ -293,7 +306,7 @@ export default function Desktop() {
           )}
           <div className="desktop-identity" aria-hidden="true">
             <span>HASSAN YOUSAF</span>
-            <small>ENGINEER / MAKER / EXPLORER</small>
+            <small>XENOS OS · PERSONAL WORKSPACE</small>
           </div>
           {prefs.sticky && (
             <aside className="desktop-note">
@@ -319,7 +332,7 @@ export default function Desktop() {
             </aside>
           )}
           <div className="desktop-edition">
-            <span className="status-dot" /> PERSONAL WORKSPACE <span>/</span>{" "}
+            <span className="status-dot" /> XENOS OS 1.0 <span>/</span>{" "}
             LAHORE, PK
           </div>
         </div>
@@ -690,78 +703,50 @@ export default function Desktop() {
             </button>
           </div>
         )}
-        {screen !== "desktop" && (
-          <section
-            className={`session-screen session-${screen}`}
-            aria-label={
-              screen === "off"
-                ? "Workspace powered off"
-                : screen === "boot"
-                  ? "Restarting workspace"
-                  : "Workspace locked"
-            }
-          >
-            {screen === "off" ? (
-              <>
-                <button
-                  className="power-on"
-                  aria-label="Power on"
-                  onClick={() => setScreen("boot")}
-                >
-                  <Icon name="power" size={38} />
-                </button>
-                <span>WORKSPACE IS OFF</span>
-                <a href="/portfolio.html">View portfolio</a>
-              </>
-            ) : screen === "boot" ? (
-              <>
-                <DesktopMark />
-                <h2>Preparing your workspace</h2>
-                <div className="boot-progress" />
-                <pre>
-                  Loading personal environment…{"\n"}Mounting portfolio files…
-                  {"\n"}Starting desktop session.
-                </pre>
-                <button className="button" onClick={() => setScreen("desktop")}>
-                  Skip startup
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="lock-clock">
-                  {now.toLocaleTimeString("en-GB", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
-                <p>
-                  {now.toLocaleDateString("en-GB", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-                <div className="lock-user">HY</div>
-                <h2>{profile.name}</h2>
-                <span>Personal workspace · Guest session</span>
-                <button
-                  className="button primary"
-                  onClick={() => setScreen("desktop")}
-                >
-                  Enter desktop <Icon name="right" size={16} />
-                </button>
-                <small>No password needed. Press Enter to continue.</small>
-                <a href="/portfolio.html">Open simple portfolio</a>
-                <div className="lock-actions">
-                  <button aria-label="Restart" onClick={() => power("restart")}>
-                    <Icon name="reset" />
-                  </button>
-                  <button aria-label="Shut down" onClick={() => power("off")}>
-                    <Icon name="power" />
-                  </button>
-                </div>
-              </>
-            )}
+        {/* First-time Linux terminal boot */}
+        {screen === "firstboot" && (
+          <TerminalBoot
+            onDone={() => {
+              saveStorage(BOOT_DONE_KEY, true);
+              setScreen("lock");
+            }}
+          />
+        )}
+
+        {/* Restart boot animation */}
+        {screen === "boot" && (
+          <div className="session-screen session-boot" aria-label="Restarting workspace">
+            <DesktopMark />
+            <h2>Restarting Xenos OS…</h2>
+            <div className="boot-progress" />
+            <pre className="boot-restart-log">
+              Stopping desktop session…{"\n"}Unmounting workspace…{"\n"}Rebooting…
+            </pre>
+          </div>
+        )}
+
+        {/* Premium lock screen */}
+        {screen === "lock" && (
+          <LockScreen
+            now={now}
+            onUnlock={() => setScreen("desktop")}
+            onRestart={() => power("restart")}
+            onPower={() => power("off")}
+          />
+        )}
+
+        {/* Power off screen */}
+        {screen === "off" && (
+          <section className="session-screen session-off" aria-label="Workspace powered off">
+            <button
+              className="power-on"
+              aria-label="Power on"
+              onClick={() => setScreen("boot")}
+            >
+              <Icon name="power" size={38} />
+            </button>
+            <span>XENOS OS — WORKSPACE IS OFF</span>
+            <a href="/portfolio.html">View portfolio</a>
           </section>
         )}
       </main>

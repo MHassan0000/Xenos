@@ -21,7 +21,7 @@ export default function About() {
           <span />
         </div>
         <div>
-          <div className="eyebrow">WELCOME TO MY DESKTOP</div>
+          <div className="eyebrow">XENOS OS 1.0 — PERSONAL WORKSPACE</div>
           <h1>Hey, I’m Hassan.</h1>
           <p>
             {profile.title}
@@ -54,7 +54,14 @@ export default function About() {
         <Icon name="info" size={15} />
         <span>
           Make yourself at home. Drag windows, right-click the desktop, or
-          search with <kbd>Ctrl K</kbd>.
+          search with <kbd>Ctrl K</kbd>. Try{" "}
+          <button
+            style={{ padding: 0, textDecoration: "underline", color: "inherit" }}
+            onClick={() => open("terminal")}
+          >
+            neofetch
+          </button>{" "}
+          in Terminal.
         </span>
       </div>
       <footer className="welcome-bottom">

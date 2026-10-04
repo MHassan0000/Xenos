@@ -26,7 +26,7 @@ export function AppMenu({ close }: { close: () => void }) {
         <div className="menu-avatar">HY</div>
         <div>
           <strong>Muhammad Hassan Yousaf</strong>
-          <small>hassan@desktop · personal workspace</small>
+          <small>hassan@xenos · Xenos OS 1.0</small>
         </div>
       </header>
       <label className="menu-search">

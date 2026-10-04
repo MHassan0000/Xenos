@@ -7,7 +7,7 @@ export default function Terminal() {
   const [lines, setLines] = useState<Line[]>([
     {
       output:
-        "HASSAN / PERSONAL SHELL\n\nA little curiosity goes a long way.\nType help to explore, or try open projects.\n",
+        "XENOS OS — PERSONAL SHELL\n\nWelcome, Hassan. The workspace is yours.\nType help to explore, or try neofetch.\n",
     },
   ]);
   const [input, setInput] = useState("");
@@ -50,8 +50,8 @@ export default function Terminal() {
     >
       <div className="terminal-tab">
         <span className="terminal-dot" />
-        hassan@desktop: {cwd === "/" ? "~" : `~${cwd}`}
-        <span>portfolio shell</span>
+        hassan@xenos: {cwd === "/" ? "~" : `~${cwd}`}
+        <span>xenos shell</span>
       </div>
       <div className="terminal-scroll">
         {lines.map((line, i) => (
@@ -59,7 +59,7 @@ export default function Terminal() {
             {line.input !== undefined && (
               <div className="terminal-prompt">
                 <span>
-                  hassan<span className="muted">@</span>workspace
+                  hassan<span className="muted">@</span>xenos
                 </span>
                 <span className="terminal-path">
                   {line.cwd === "/" ? "~" : `~${line.cwd}`}
@@ -74,7 +74,7 @@ export default function Terminal() {
         <form className="terminal-input-row" onSubmit={submit}>
           <label htmlFor="terminal-input">
             <span>
-              hassan<span className="muted">@</span>workspace
+              hassan<span className="muted">@</span>xenos
             </span>
             <span className="terminal-path">
               {cwd === "/" ? "~" : `~${cwd}`}
