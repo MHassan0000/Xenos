@@ -35,8 +35,8 @@ export default function Desktop() {
   const [prefs, updatePrefs] = useState(getPreferences);
   const wm = useWindows(prefs.restore);
   const [overlay, setOverlay] = useState<Overlay>(null);
-  const hasBooted = readStorage<boolean>(BOOT_DONE_KEY, false);
-  const [screen, setScreen] = useState<Screen>(hasBooted ? "lock" : "firstboot");
+  /* Show the Linux-style boot log whenever the workspace is freshly opened. */
+  const [screen, setScreen] = useState<Screen>("firstboot");
   const [startupNotice, setStartupNotice] = useState(false);
   const startupNoticeShown = useRef(false);
   const startupNoticeTimer = useRef<number | undefined>(undefined);

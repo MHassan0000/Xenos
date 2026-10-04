@@ -430,7 +430,7 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
                 }}
               >
                 <Icon name="trash" />
-                Delete temporary item
+                Delete
               </button>
             )}
         </Popover>
