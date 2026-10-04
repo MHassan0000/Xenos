@@ -73,8 +73,8 @@ export default function About() {
           />{" "}
           Show at login
         </label>
-        <a href="/portfolio.html">
-          Just here for the portfolio <Icon name="external" size={12} />
+        <a href={`#/browser/${encodeURIComponent(profile.source)}`}>
+          Open my live portfolio <Icon name="globe" size={12} />
         </a>
       </footer>
     </div>

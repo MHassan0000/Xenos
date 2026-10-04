@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/((?!assets|games|licenses|favicon.svg|robots.txt|llms.txt|portfolio.html|THIRD-PARTY-NOTICES.txt).*)", "destination": "/index.html" }
+    { "source": "/((?!assets|games|licenses|favicon.svg|robots.txt|llms.txt|THIRD-PARTY-NOTICES.txt).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

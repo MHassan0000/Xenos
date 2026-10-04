@@ -18,7 +18,7 @@ npm run build
 npm run preview
 ```
 
-Preview runs at **http://127.0.0.1:4173**. Deploy `dist/` to a static host. App routes use URL hashes, so no special server rewrite is required. The plain portfolio is at `/portfolio.html` and works without JavaScript.
+Preview runs at **http://127.0.0.1:4173**. Deploy `dist/` to a static host. App routes use URL hashes, so no special server rewrite is required. The Web Browser app opens Hassan’s live portfolio at https://hassanyousaf.vercel.app.
 
 ## Included
 
@@ -41,7 +41,7 @@ Preview runs at **http://127.0.0.1:4173**. Deploy `dist/` to a static host. App 
 | `src/styles/desktop.css` | Black desktop theme, ambient wallpaper, panel, launcher and welcome layout |
 | `src/styles/apps.css`, `utilities.css`, `games.css` | Individual application styling |
 
-`scripts/static-portfolio.mjs` generates the accessible HTML portfolio from the same content model during development startup and build. Avoid editing `public/portfolio.html` directly.
+Edit the shared profile, project, and journey data shown in the native desktop applications. The visitor experience opens the live source portfolio from the Web Browser app.
 
 ## Architecture and behavior
 
@@ -80,6 +80,6 @@ Browser scripts require installed Google Chrome and a running dev/preview server
 
 This is a browser workspace. Lock/power/network/system-monitor controls operate on this experience and do not control the visitor’s actual computer. There is no authentication, backend, fake message delivery or external upload of local notes.
 
-External sites open normally in a browser tab by default. An optional sandboxed preview is offered, but embedding restrictions are respected. Night Drive needs WebGL. The bundled DOOM port is silent, contains only the shareware episode, and does not persist saved games. A genuine downloadable CV was not found in the supplied portfolio; Résumé presents verified published information without inventing a PDF.
+The Web Browser displays websites inside the desktop where their security policies allow framing. Google uses its supported embedded view; sites such as GitHub and LinkedIn that block framing keep their open-in-tab action. Night Drive needs WebGL. The bundled DOOM port is silent, contains only the shareware episode, and does not persist saved games. A genuine downloadable CV was not found in the supplied portfolio; Résumé presents verified published information without inventing a PDF.
 
 The LithOS repository had no top-level license grant when inspected; its application code and desktop art are not copied. DOOM is bundled independently from its upstream WebAssembly distribution, with the corresponding engine source archive and GPL license available from the game’s credits. See `public/THIRD-PARTY-NOTICES.txt` for dependencies, attribution and source provenance.

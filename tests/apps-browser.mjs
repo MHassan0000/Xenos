@@ -271,12 +271,17 @@ try {
     "Portfolio",
     win("browser").locator(".browser-bookmarks"),
   ).click();
-  await expect(win("browser").locator("iframe")).toBeVisible();
-  await expect(
-    page.frameLocator('[data-window="browser"] iframe').locator(".project"),
-  ).toHaveCount(29);
+  await expect(win("browser").locator("iframe")).toHaveAttribute(
+    "src",
+    "https://hassanyousaf.vercel.app/",
+  );
+  await button("Google", win("browser").locator(".browser-bookmarks")).click();
+  await expect(win("browser").locator("iframe")).toHaveAttribute(
+    "src",
+    "https://www.google.com/webhp?igu=1&hl=en",
+  );
   check(
-    "Web Browser supports tabs, history, verified bookmarks and local portfolio preview",
+    "Web Browser supports tabs, verified bookmarks, Hassan’s live portfolio and embedded Google",
   );
   await close("browser");
   await app("Ambient", "music");

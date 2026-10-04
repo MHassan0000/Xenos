@@ -20,7 +20,7 @@ class ErrorBoundary extends React.Component<
     return this.state.failed ? (
       <main className="recovery">
         <h1>Let’s reopen your workspace.</h1>
-        <p>Your portfolio is still available in the simple view.</p>
+        <p>Your portfolio is still available on Hassan’s website.</p>
         <button
           onClick={() => {
             try {
@@ -33,7 +33,7 @@ class ErrorBoundary extends React.Component<
         >
           Reset window session
         </button>
-        <a href="/portfolio.html">Open portfolio</a>
+        <a href="https://hassanyousaf.vercel.app/" target="_blank" rel="noreferrer">Open portfolio</a>
       </main>
     ) : (
       this.props.children

@@ -82,6 +82,13 @@ export const files: FileNode[] = [
     target: s.url,
     content: s.url,
   })),
+  {
+    path: "/Links/Portfolio.url",
+    name: "Portfolio.url",
+    type: "link" as const,
+    target: profile.source,
+    content: profile.source,
+  },
 ];
 export function normalizePath(path: string, cwd = "/") {
   const parts: string[] = [];

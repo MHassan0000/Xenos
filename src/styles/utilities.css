@@ -434,6 +434,23 @@
   border: 1px solid #444455;
   border-radius: 12px;
 }
+.browser-quicklinks .browser-site-mark {
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: -1px;
+  color: #fff;
+  box-shadow: 0 6px 18px #0005, inset 0 1px #ffffff35;
+}
+.browser-site-mark.google {
+  color: #fff;
+  background: #30343f;
+  text-shadow: -1px -1px #4285f4, 1px 1px #34a853, 1px -1px #ea4335, -1px 1px #fbbc05;
+}
+.browser-site-mark.wiki { font-family: Georgia, serif; background: linear-gradient(145deg,#f5f5f4,#bfc3cf); color: #323844; }
+.browser-site-mark.duck { background: linear-gradient(145deg,#ffb84a,#e76b2d); }
+.browser-site-mark.hy { background: linear-gradient(145deg,#44d0c5,#386de8 62%,#8858e8); }
+.browser-site-mark.github { background: linear-gradient(145deg,#545667,#262832); }
+.browser-site-mark.linkedin { background: linear-gradient(145deg,#1686d9,#1454a6); }
 .browser-page {
   flex: 1;
   display: flex;

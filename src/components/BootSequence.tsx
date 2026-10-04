@@ -325,8 +325,8 @@ export function LockScreen({
             <small className="lock-hint-text">
               Press Enter to continue · No password needed
             </small>
-            <a href="/portfolio.html" className="lock-portfolio-link">
-              Open simple portfolio
+            <a href={profile.source} className="lock-portfolio-link" target="_blank" rel="noreferrer">
+              View Hassan’s portfolio
             </a>
           </>
         )}

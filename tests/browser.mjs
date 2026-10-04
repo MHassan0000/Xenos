@@ -400,24 +400,24 @@ try {
     "none",
   );
   check("Device reduced-motion preference overrides animations");
-  await page.goto(origin + "/portfolio.html");
-  assert.equal(await page.locator(".project").count(), 29);
-  await page
-    .getByRole("searchbox", { name: "Search portfolio projects" })
-    .fill("Axon");
-  assert.equal(await page.locator(".project:visible").count(), 1);
-  check(
-    "Accessible static portfolio includes all projects and working filtering",
+  await page.goto(origin + "/#/about");
+  await win("about").waitFor();
+  const livePortfolio = win("about").getByRole("link", {
+    name: "Open my live portfolio",
+  });
+  await expect(livePortfolio).toHaveAttribute(
+    "href",
+    /#\/browser\/https%3A%2F%2Fhassanyousaf\.vercel\.app/,
   );
-  const noJs = await browser.newContext({ javaScriptEnabled: false });
-  const fallback = await noJs.newPage();
-  await fallback.goto(origin + "/portfolio.html");
-  assert.equal(await fallback.locator(".project").count(), 29);
-  await noJs.close();
-  check("Full portfolio works without JavaScript");
+  await livePortfolio.click();
+  await expect(win("browser").locator("iframe")).toHaveAttribute(
+    "src",
+    "https://hassanyousaf.vercel.app/",
+  );
+  check("Portfolio shortcut opens Hassan’s live website in the OS Browser");
   // Seed storage outside the running desktop so its session persistence cannot
   // overwrite the deliberately invalid record while navigation begins.
-  await page.goto(origin + "/portfolio.html");
+  await page.goto(origin + "/robots.txt");
   await page.evaluate(() => {
     localStorage.setItem(
       "workspace:v2:session",

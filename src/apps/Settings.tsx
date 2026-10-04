@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useDesktop } from "../core/context";
 import { accents, type Preferences } from "../core/persistence";
 import { Icon, DesktopMark } from "../components/Icon";
+import { profile } from "../data/portfolio";
 export default function Settings() {
-  const { prefs, setPrefs, reset, notify } = useDesktop();
+  const { prefs, setPrefs, reset, notify, open } = useDesktop();
   const [tab, setTab] = useState("Appearance");
   const [confirm, setConfirm] = useState(false);
   return (
@@ -227,9 +228,12 @@ export default function Settings() {
               <Icon name="reset" size={15} />
               Re-run boot sequence
             </button>
-            <a className="button" href="/portfolio.html">
-              Open simple portfolio
-            </a>
+            <button
+              className="button"
+              onClick={() => open("browser", profile.source)}
+            >
+              Open portfolio in Web Browser
+            </button>
             <a
               className="button"
               href="/THIRD-PARTY-NOTICES.txt"

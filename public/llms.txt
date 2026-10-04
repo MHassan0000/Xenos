@@ -4,9 +4,8 @@
 
 ## Portfolio
 
-- [Accessible portfolio](/portfolio.html): Biography, all 29 projects and workflows, skills, engineering journey, and contact links. Available without JavaScript.
 - [Interactive desktop](/): Browser desktop with a project library, résumé, virtual files, and portfolio terminal.
-- [Original portfolio](https://hassanyousaf.vercel.app): Primary source for personal information and project content.
+- [Portfolio](https://hassanyousaf.vercel.app): Primary source for personal information and project content.
 
 ## Contact
 

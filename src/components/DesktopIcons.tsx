@@ -134,7 +134,7 @@ export function DesktopIcons({
               node.addEventListener("pointercancel", end);
             }}
           >
-            <AppIcon app={app} />
+            <AppIcon app={app} className={`desktop-logo desktop-logo-${app}`} />
             <span>{label}</span>
           </button>
         );

@@ -19,6 +19,7 @@ import { AppMenu } from "./components/AppMenu";
 import { DesktopIcons } from "./components/DesktopIcons";
 import { projects, profile } from "./data/portfolio";
 import { TerminalBoot, LockScreen } from "./components/BootSequence";
+import { playSoftNotification } from "./core/audio";
 type Overlay =
   | "launcher"
   | "search"
@@ -36,6 +37,9 @@ export default function Desktop() {
   const [overlay, setOverlay] = useState<Overlay>(null);
   const hasBooted = readStorage<boolean>(BOOT_DONE_KEY, false);
   const [screen, setScreen] = useState<Screen>(hasBooted ? "lock" : "firstboot");
+  const [startupNotice, setStartupNotice] = useState(false);
+  const startupNoticeShown = useRef(false);
+  const startupNoticeTimer = useRef<number | undefined>(undefined);
   const [taskGroup, setTaskGroup] = useState<AppId | null>(null);
   const [context, setContext] = useState<{
     x: number;
@@ -122,6 +126,18 @@ export default function Desktop() {
     },
     [wm.open, closeMenus],
   );
+  const enterDesktop = useCallback(() => {
+    setScreen("desktop");
+    if (startupNoticeShown.current) return;
+    startupNoticeShown.current = true;
+    setStartupNotice(true);
+    playSoftNotification(prefs.volume);
+    clearTimeout(startupNoticeTimer.current);
+    startupNoticeTimer.current = window.setTimeout(
+      () => setStartupNotice(false),
+      7200,
+    );
+  }, [prefs.volume]);
   useEffect(() => {
     const route = () => {
       let p: string[];
@@ -154,6 +170,7 @@ export default function Desktop() {
       clearTimeout(toastTimer.current);
       removeEventListener("online", net);
       removeEventListener("offline", net);
+      clearTimeout(startupNoticeTimer.current);
     };
   }, []);
   useEffect(() => {
@@ -176,7 +193,7 @@ export default function Desktop() {
       if (screen === "lock") {
         if (e.key === "Enter" || e.key === "Escape") {
           e.preventDefault();
-          setScreen("desktop");
+          enterDesktop();
         }
         return;
       }
@@ -201,7 +218,7 @@ export default function Desktop() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [screen, wm.desktop, closeMenus]);
+  }, [screen, wm.desktop, closeMenus, enterDesktop]);
   useEffect(() => {
     if (screen !== "boot") return;
     /* boot triggered by power("restart") — just go to lock after brief delay */
@@ -220,7 +237,10 @@ export default function Desktop() {
   const power = useCallback(
     (action: "lock" | "logout" | "restart" | "off") => {
       closeMenus();
-      if (action === "logout" || action === "restart") wm.reset();
+      if (action === "logout" || action === "restart" || action === "off") {
+        wm.reset();
+        startupNoticeShown.current = false;
+      }
       setScreen(
         action === "off" ? "off" : action === "restart" ? "boot" : "lock",
       );
@@ -284,8 +304,11 @@ export default function Desktop() {
             menu(e);
         }}
       >
-        <a className="skip-link" href="/portfolio.html">
-          Skip desktop — view portfolio
+        <a
+          className="skip-link"
+          href={`#/browser/${encodeURIComponent(profile.source)}`}
+        >
+          Open my portfolio in Web Browser
         </a>
         <div className="wallpaper" aria-hidden="true">
           <div className="ambient-halo" />
@@ -703,6 +726,36 @@ export default function Desktop() {
             </button>
           </div>
         )}
+        {screen === "desktop" && startupNotice && (
+          <aside
+            className="desktop-welcome-notice"
+            role="status"
+            aria-live="polite"
+          >
+            <img src="/assets/me.jpg" alt="" />
+            <div className="desktop-welcome-copy">
+              <strong>{profile.name}</strong>
+              <p>{profile.title}</p>
+              <span>{profile.location} · Let’s build something thoughtful.</span>
+              <button
+                className="desktop-welcome-action"
+                onClick={() => {
+                  setStartupNotice(false);
+                  open("contact");
+                }}
+              >
+                Get in touch
+              </button>
+            </div>
+            <button
+              className="desktop-welcome-dismiss"
+              aria-label="Dismiss welcome notification"
+              onClick={() => setStartupNotice(false)}
+            >
+              <Icon name="close" size={17} />
+            </button>
+          </aside>
+        )}
         {/* First-time Linux terminal boot */}
         {screen === "firstboot" && (
           <TerminalBoot
@@ -729,7 +782,7 @@ export default function Desktop() {
         {screen === "lock" && (
           <LockScreen
             now={now}
-            onUnlock={() => setScreen("desktop")}
+            onUnlock={enterDesktop}
             onRestart={() => power("restart")}
             onPower={() => power("off")}
           />
@@ -746,7 +799,7 @@ export default function Desktop() {
               <Icon name="power" size={38} />
             </button>
             <span>XENOS OS — WORKSPACE IS OFF</span>
-            <a href="/portfolio.html">View portfolio</a>
+            <a href={profile.source} target="_blank" rel="noreferrer">View portfolio</a>
           </section>
         )}
       </main>

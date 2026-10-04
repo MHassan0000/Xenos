@@ -4,6 +4,17 @@ import { profile } from "../data/portfolio";
 import { useDesktop } from "../core/context";
 type Tab = { id: number; history: string[]; index: number };
 const home = "about:home";
+const webBookmarks = [
+  { name: "Portfolio", url: profile.source, mark: "hy" },
+  { name: "Google", url: "https://www.google.com/webhp?igu=1", mark: "google" },
+  { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/Main_Page", mark: "wiki" },
+  { name: "DuckDuckGo", url: "https://duckduckgo.com/", mark: "duck" },
+];
+const homeLinks = [
+  ...webBookmarks,
+  { ...profile.social[0], mark: "github" },
+  { ...profile.social[1], mark: "linkedin" },
+];
 export default function Browser({ initialUrl }: { initialUrl?: string }) {
   const { open } = useDesktop();
   const [tabs, setTabs] = useState<Tab[]>([
@@ -12,7 +23,6 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
   const [active, setActive] = useState(1);
   const [address, setAddress] = useState("");
   const [reload, setReload] = useState(0);
-  const [frame, setFrame] = useState(false);
   const tab = tabs.find((t) => t.id === active) || tabs[0];
   const url = tab.history[tab.index];
   function go(input: string) {
@@ -25,9 +35,14 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
           ? raw
           : raw.includes(".") && !raw.includes(" ")
             ? "https://" + raw
-            : "https://www.google.com/search?q=" + encodeURIComponent(raw);
+            : "https://www.google.com/search?igu=1&hl=en&q=" + encodeURIComponent(raw);
         const parsed = new URL(candidate);
         if (!["http:", "https:"].includes(parsed.protocol)) return;
+        if (/^(www\.)?google\.com$/i.test(parsed.hostname)) {
+          if (parsed.pathname === "/") parsed.pathname = "/webhp";
+          parsed.searchParams.set("igu", "1");
+          if (!parsed.searchParams.has("hl")) parsed.searchParams.set("hl", "en");
+        }
         next = parsed.href;
       }
     } catch {
@@ -44,11 +59,9 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
           : t,
       ),
     );
-    setFrame(false);
   }
   useEffect(() => {
     setAddress(url === home ? "" : url);
-    setFrame(false);
   }, [url, active]);
   useEffect(() => {
     if (initialUrl) go(initialUrl);
@@ -61,6 +74,9 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
     }
   };
   const safePreview = url !== home && new URL(url).origin === location.origin;
+  const externalSite = url === home ? null : new URL(url);
+  const previewBlocked = !!externalSite &&
+    /(^|\.)(github\.com|linkedin\.com)$/i.test(externalSite.hostname);
   return (
     <div className="browser-app">
       <div className="browser-tabs">
@@ -169,14 +185,14 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
         </button>
       </form>
       <div className="browser-bookmarks">
-        {profile.social.map((s) => (
+        {webBookmarks.map((s) => (
           <button key={s.name} onClick={() => go(s.url)}>
             {s.name}
           </button>
         ))}
-        <button onClick={() => go(location.origin + "/portfolio.html")}>
-          Portfolio
-        </button>
+        {profile.social.map((s) => (
+          <button key={s.name} onClick={() => go(s.url)}>{s.name}</button>
+        ))}
       </div>
       {url === home ? (
         <div className="browser-home scroll-area">
@@ -184,7 +200,6 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
             <Icon name="globe" size={48} />
           </div>
           <span className="eyebrow">A WINDOW TO THE WEB</span>
-          <h1>Where to next?</h1>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -203,15 +218,10 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
             </button>
           </form>
           <div className="browser-quicklinks">
-            {profile.social.map((s, i) => (
-              <button key={s.name} onClick={() => go(s.url)}>
-                <span>
-                  <Icon
-                    name={["github", "linkedin", "globe", "code"][i]}
-                    size={23}
-                  />
-                </span>
-                {s.name}
+            {homeLinks.map((site) => (
+              <button key={site.name} onClick={() => go(site.url)}>
+                <BrowserMark mark={site.mark} />
+                {site.name}
               </button>
             ))}
           </div>
@@ -221,10 +231,10 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
         </div>
       ) : (
         <div className="browser-page">
-          {frame || safePreview ? (
+          {safePreview || !previewBlocked ? (
             <>
               <div className="browser-frame-note">
-                <span>Website preview · some sites prevent embedding</span>
+                <span>Live website · some sites limit embedded browsing</span>
                 <a href={url} target="_blank" rel="noreferrer">
                   Open in new tab <Icon name="external" size={12} />
                 </a>
@@ -238,14 +248,15 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
                     ? undefined
                     : "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
                 }
-                referrerPolicy="no-referrer"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="clipboard-read; clipboard-write"
               />
             </>
           ) : (
             <div className="browser-external">
               <Icon name="globe" size={38} />
               <h2>{label(url)}</h2>
-              <p>Open this page in your browser for the full experience.</p>
+              <p>This website restricts embedded views. Open it in a browser tab to continue.</p>
               <code>{url}</code>
               <a
                 className="button primary"
@@ -255,14 +266,8 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
               >
                 Open website <Icon name="external" size={15} />
               </a>
-              <button className="text-button" onClick={() => setFrame(true)}>
-                Try an embedded preview
-              </button>
               <small>
-                Websites such as GitHub and LinkedIn block embedded views.
-                <br />
-                Your browser tab keeps their normal security and sign-in
-                behavior.
+                Websites such as GitHub and LinkedIn limit embedded access. Other sites open right here in the desktop.
               </small>
             </div>
           )}
@@ -270,4 +275,11 @@ export default function Browser({ initialUrl }: { initialUrl?: string }) {
       )}
     </div>
   );
+}
+
+function BrowserMark({ mark }: { mark: string }) {
+  if (mark === "github") return <span className="browser-site-mark github"><Icon name="github" size={22} /></span>;
+  if (mark === "linkedin") return <span className="browser-site-mark linkedin"><Icon name="linkedin" size={22} /></span>;
+  const letter = mark === "google" ? "G" : mark === "wiki" ? "W" : mark === "duck" ? "D" : "H";
+  return <span className={`browser-site-mark ${mark}`}>{letter}</span>;
 }
