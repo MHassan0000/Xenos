@@ -58,11 +58,14 @@ async function terminal(cmd) {
     .fill(cmd);
   await page.keyboard.press("Enter");
 }
+async function finishStartup() {
+  const skip = button("Skip startup");
+  if (await skip.isVisible().catch(() => false)) await skip.click();
+}
 try {
   await page.goto(origin);
   await win("about").waitFor();
-  if (await button("Skip startup").isVisible())
-    await button("Skip startup").click();
+  await finishStartup();
   if (await button("Dismiss welcome notification").isVisible())
     await button("Dismiss welcome notification").click();
   await page.evaluate(() => document.fonts.ready);
@@ -271,6 +274,7 @@ try {
     .click();
   await page.waitForTimeout(250);
   await page.reload();
+  await finishStartup();
   if (await page.getByLabel("Workspace locked").isVisible())
     await page.keyboard.press("Enter");
   await win("settings").waitFor();
@@ -293,6 +297,7 @@ try {
   await page.waitForTimeout(250);
   await page.goto(origin);
   await win("about").waitFor();
+  await finishStartup();
   if (await page.getByLabel("Workspace locked").isVisible())
     await page.keyboard.press("Enter");
   assert.equal(await page.locator(".os-window").count(), 1);
@@ -381,6 +386,7 @@ try {
   check("Mobile presentation preserves desktop window geometry");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(origin + "/#/about");
+  await finishStartup();
   await win("about").waitFor();
   const mobile = await geometry("about");
   assert.equal(mobile.width, 390);
@@ -439,6 +445,7 @@ try {
   });
   await page.goto(origin);
   await win("about").waitFor();
+  await finishStartup();
   assert.equal(await page.locator(".os-window").count(), 1);
   check("Malformed saved state safely falls back to defaults");
   assert.deepEqual(errors, []);

@@ -4,6 +4,7 @@ import { registry, launchable, type AppId } from "../core/registry";
 import { projects, skills, profile } from "../data/portfolio";
 import { allFiles } from "../core/filesystem";
 import { Icon, DesktopMark } from "./Icon";
+import { DesktopAppIcon } from "./DesktopAppIcon";
 export function Popover({
   children,
   className,
@@ -142,8 +143,8 @@ export function AppIcon({
 }) {
   const meta = registry[app];
   return (
-    <span className={`app-icon ${meta.color} ${className}`}>
-      <Icon name={meta.icon} size={24} />
+    <span className={`app-icon ${meta.color} illustrated ${className}`}>
+      <DesktopAppIcon app={app} />
     </span>
   );
 }

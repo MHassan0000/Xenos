@@ -144,20 +144,26 @@
 }
 .desktop-shortcut {
   position: absolute;
-  width: 94px;
-  height: 88px;
-  padding: 8px 3px;
-  gap: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 116px;
+  height: 110px;
+  padding: 5px 3px;
+  gap: 5px;
   pointer-events: auto;
   touch-action: none;
   border: 1px solid transparent;
   border-radius: 5px;
 }
 .desktop-shortcut > span:last-child {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.35;
   text-shadow: 0 1px 5px #000;
-  max-width: 92px;
+  max-width: 108px;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 .desktop-shortcut:hover {
   background: #ffffff09 !important;
@@ -166,73 +172,34 @@
   background: #ffffff10;
   border-color: #ffffff23;
 }
-.desktop-shortcut .app-icon {
-  position: relative;
-  overflow: hidden;
-  width: 44px;
-  height: 44px;
-  border-radius: 11px;
-  box-shadow:
-    0 4px 8px #0004,
-    inset 0 1px 0 #ffffff22;
+.desktop-app-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  filter: drop-shadow(0 4px 4px #0005);
 }
-.desktop-shortcut .app-icon.desktop-logo {
-  --icon-accent: #aeb9c8;
-  isolation: isolate;
-  border: 1px solid color-mix(in srgb, var(--icon-accent) 52%, #20242b);
-  background: linear-gradient(145deg, #242a32, #111419 76%);
-  box-shadow:
-    0 5px 13px #0007,
-    inset 0 1px #ffffff1c,
-    inset 0 -7px 13px #0005;
+.desktop-app-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-.desktop-shortcut .app-icon.desktop-logo::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    ellipse at 22% 10%,
-    color-mix(in srgb, var(--icon-accent) 23%, transparent),
-    transparent 58%
-  );
-  opacity: 0.72;
-  pointer-events: none;
+.desktop-glyph-tile {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
 }
-.desktop-shortcut .app-icon.desktop-logo::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  right: 5px;
-  bottom: 5px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--icon-accent);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--icon-accent) 38%, transparent);
-  opacity: 0.72;
-  pointer-events: none;
+.desktop-glyph-tile > svg {
+  width: 54%;
+  height: 54%;
 }
-.desktop-shortcut:hover .app-icon.desktop-logo {
-  border-color: color-mix(in srgb, var(--icon-accent) 64%, #343a44);
-  box-shadow:
-    0 6px 15px #0009,
-    0 0 9px color-mix(in srgb, var(--icon-accent) 9%, transparent),
-    inset 0 1px #ffffff24,
-    inset 0 -7px 13px #0005;
-}
-.desktop-shortcut .app-icon.desktop-logo svg {
-  z-index: 1;
-  color: var(--icon-accent);
-  filter: drop-shadow(
-    0 0 2px color-mix(in srgb, var(--icon-accent) 20%, transparent)
-  );
-}
-.desktop-shortcut .app-icon svg {
-  width: 28px;
-  height: 28px;
-  stroke-width: 1.65;
+.desktop-app-icon-home,
+.desktop-app-icon-projects,
+.desktop-app-icon-games {
+  filter: drop-shadow(0 3px 2px #0004);
 }
 .app-icon {
   background: linear-gradient(145deg, #34363c, #1d1e22);
@@ -264,41 +231,21 @@
   background: linear-gradient(145deg, #37383d, #212226);
   color: #d5d5df;
 }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-files {
-  --icon-accent: #82d8f0;
+.app-icon.illustrated {
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-document {
-  --icon-accent: #c1a5ff;
+.app-icon.illustrated > .desktop-app-icon {
+  width: 100%;
+  height: 100%;
+  flex-basis: auto;
+  filter: none;
 }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-projects {
-  --icon-accent: #f2c477;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-resume {
-  --icon-accent: #6ed9bc;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-terminal {
-  --icon-accent: #9fe49c;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-browser {
-  --icon-accent: #9cb9ff;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-skills {
-  --icon-accent: #db9bff;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-contact {
-  --icon-accent: #ff9caf;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-games {
-  --icon-accent: #ef91d0;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-doom {
-  --icon-accent: #ff8c6d;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-racer {
-  --icon-accent: #67deea;
-}
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-trash {
-  --icon-accent: #b7c2d2;
+.app-icon.illustrated > .desktop-app-icon > svg {
+  width: 100%;
+  height: 100%;
 }
 .desktop-identity {
   position: absolute;
@@ -1504,11 +1451,14 @@
   .desktop-shortcut {
     position: static !important;
     width: auto;
-    height: 90px;
+    height: 102px;
+    padding: 2px;
+    gap: 4px;
   }
-  .desktop-shortcut .app-icon {
-    width: 44px;
-    height: 44px;
+  .desktop-shortcut .desktop-app-icon {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
   }
   .desktop-note {
     top: auto;

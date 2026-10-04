@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { registry, type AppId } from "../core/registry";
 import { readStorage, saveStorage, STORAGE_KEY } from "../core/persistence";
-import { AppIcon } from "./Popovers";
+import { DesktopAppIcon } from "./DesktopAppIcon";
 const shortcuts: [AppId, string, string?][] = [
   ["files", "Home"],
   ["document", "README.md", "/Documents/About.md"],
@@ -30,7 +30,7 @@ export function DesktopIcons({
     Record<string, { x: number; y: number }>
   >(() => readStorage(STORAGE_KEY + ":icons", {}));
   const moved = useRef(false);
-  const rows = Math.max(3, Math.min(6, Math.floor((innerHeight - 110) / 96)));
+  const rows = Math.max(3, Math.min(6, Math.floor((innerHeight - 110) / 138)));
   const previous = useRef(version);
   if (previous.current !== version) {
     previous.current = version;
@@ -43,10 +43,10 @@ export function DesktopIcons({
         const valid = raw && Number.isFinite(raw.x) && Number.isFinite(raw.y);
         const pos = valid
           ? {
-              x: Math.max(8, Math.min(raw.x, innerWidth - 105)),
+              x: Math.max(8, Math.min(raw.x, innerWidth - 120)),
               y: Math.max(8, Math.min(raw.y, innerHeight - 155)),
             }
-          : { x: 18 + Math.floor(i / rows) * 110, y: 20 + (i % rows) * 96 };
+          : { x: 18 + Math.floor(i / rows) * 132, y: 20 + (i % rows) * 138 };
         return (
           <button
             key={app}
@@ -104,7 +104,7 @@ export function DesktopIcons({
                   node.style.left =
                     Math.max(
                       8,
-                      Math.min(pos.x + v.clientX - sx, innerWidth - 105),
+                      Math.min(pos.x + v.clientX - sx, innerWidth - 120),
                     ) + "px";
                   node.style.top =
                     Math.max(
@@ -127,6 +127,8 @@ export function DesktopIcons({
                   };
                   setPositions(p);
                   saveStorage(STORAGE_KEY + ":icons", p);
+                  setSelected("");
+                  node.blur();
                 }
               };
               node.addEventListener("pointermove", move);
@@ -134,7 +136,7 @@ export function DesktopIcons({
               node.addEventListener("pointercancel", end);
             }}
           >
-            <AppIcon app={app} className={`desktop-logo desktop-logo-${app}`} />
+            <DesktopAppIcon app={app} />
             <span>{label}</span>
           </button>
         );
