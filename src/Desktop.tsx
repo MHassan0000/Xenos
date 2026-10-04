@@ -35,7 +35,7 @@ export default function Desktop() {
   const wm = useWindows(prefs.restore);
   const [overlay, setOverlay] = useState<Overlay>(null);
   const hasBooted = readStorage<boolean>(BOOT_DONE_KEY, false);
-  const [screen, setScreen] = useState<Screen>(hasBooted ? "desktop" : "firstboot");
+  const [screen, setScreen] = useState<Screen>(hasBooted ? "lock" : "firstboot");
   const [taskGroup, setTaskGroup] = useState<AppId | null>(null);
   const [context, setContext] = useState<{
     x: number;
@@ -164,7 +164,7 @@ export default function Desktop() {
         : active
           ? registry[active.app].name
           : null;
-    document.title = `${name ? name + " · " : ""}${profile.name} — Personal desktop`;
+    document.title = `${name ? name + " · " : ""}${profile.name} — Xenos OS`;
   }, [wm.active, wm.windows]);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

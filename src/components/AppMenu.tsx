@@ -23,7 +23,9 @@ export function AppMenu({ close }: { close: () => void }) {
       close={close}
     >
       <header>
-        <div className="menu-avatar">HY</div>
+        <div className="menu-avatar">
+          <img src="/assets/me.jpg" alt="Hassan Yousaf" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit", display: "block" }} />
+        </div>
         <div>
           <strong>Muhammad Hassan Yousaf</strong>
           <small>hassan@xenos · Xenos OS 1.0</small>

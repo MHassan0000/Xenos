@@ -263,7 +263,11 @@ export function LockScreen({
             {/* User */}
             <div className="lock-user-row">
               <div className="lock-avatar-ring">
-                <div className="lock-avatar">HY</div>
+                <img
+                  src="/assets/me.jpg"
+                  alt="Hassan Yousaf"
+                  className="lock-avatar-photo"
+                />
               </div>
               <div>
                 <div className="lock-username">{profile.name}</div>
@@ -289,7 +293,11 @@ export function LockScreen({
 
             {/* User */}
             <div className="lock-avatar-ring">
-              <div className="lock-avatar">HY</div>
+              <img
+                src="/assets/me.jpg"
+                alt="Hassan Yousaf"
+                className="lock-avatar-photo"
+              />
             </div>
             <div className="lock-username">{profile.name}</div>
 

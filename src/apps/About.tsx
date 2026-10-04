@@ -16,8 +16,8 @@ export default function About() {
   return (
     <div className="welcome-app scroll-area">
       <header className="welcome-heading">
-        <div className="welcome-avatar">
-          HY
+        <div className="welcome-avatar welcome-avatar-photo">
+          <img src="/assets/me.jpg" alt="Hassan Yousaf" />
           <span />
         </div>
         <div>

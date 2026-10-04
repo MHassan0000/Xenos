@@ -1,0 +1,8 @@
+# Dev/reference only — don't deploy
+.reference/
+.qa/
+docs/
+tests/
+scripts/
+tsconfig.tsbuildinfo
+*.log
