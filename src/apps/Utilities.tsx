@@ -13,9 +13,15 @@ import {
   downloadText,
 } from "../core/localFiles";
 import { readStorage, saveStorage, STORAGE_KEY } from "../core/persistence";
+import {
+  getSessionTextFile,
+  updateSessionTextFile,
+} from "../core/sessionFiles";
 export function Editor({ id }: { id?: string }) {
   const { notify } = useDesktop();
   const saved = getDocuments().find((d) => d.id === id && !d.deleted);
+  const sessionFile = getSessionTextFile(id);
+  const isSessionTarget = id?.startsWith("session:") || false;
   const draft = useRef(
     readStorage<{ name: string; content: string } | null>(
       STORAGE_KEY + ":draft",
@@ -29,21 +35,55 @@ export function Editor({ id }: { id?: string }) {
   )
     draft.current = null;
   const [name, setName] = useState(
-    saved?.name ?? draft.current?.name ?? "Untitled.txt",
+    saved?.name ??
+      sessionFile?.name ??
+      (isSessionTarget ? "Untitled.txt" : draft.current?.name) ??
+      "Untitled.txt",
   );
   const [text, setText] = useState(
-    saved?.content ?? draft.current?.content ?? "",
+    saved?.content ??
+      sessionFile?.content ??
+      (isSessionTarget ? "" : draft.current?.content) ??
+      "",
   );
   const [fileId, setFileId] = useState(saved?.id);
-  const [dirty, setDirty] = useState(!saved && !!text);
+  const [sessionPath, setSessionPath] = useState(
+    isSessionTarget ? id : undefined,
+  );
+  const [dirty, setDirty] = useState(!saved && !sessionFile && !!text);
   const [wrap, setWrap] = useState(true);
   const [status, setStatus] = useState("");
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    if (id?.startsWith("session:")) {
+      const d = getSessionTextFile(id);
+      if (d) {
+        setName(d.name);
+        setText(d.content || "");
+        setFileId(undefined);
+        setSessionPath(id);
+        setDirty(false);
+        setStatus("Temporary file · this session only");
+      } else {
+        setName("Untitled.txt");
+        setText("");
+        setFileId(undefined);
+        setSessionPath(id);
+        setDirty(false);
+        setStatus("This temporary file ended with the previous session.");
+      }
+      return;
+    }
+    setSessionPath(undefined);
     if (id) {
       const d = getDocuments().find((d) => d.id === id && !d.deleted);
       if (d) {
-        if (dirty && fileId !== id && !saveDocument(name, text, fileId)) {
+        if (
+          !sessionPath &&
+          dirty &&
+          fileId !== id &&
+          !saveDocument(name, text, fileId)
+        ) {
           setStatus(
             "Could not save the current draft. Download it before opening another document.",
           );
@@ -57,6 +97,7 @@ export function Editor({ id }: { id?: string }) {
     }
   }, [id]);
   useEffect(() => {
+    if (sessionPath) return;
     const persist = () =>
       saveStorage(STORAGE_KEY + ":draft", { name, content: text });
     const t = setTimeout(persist, 300);
@@ -66,6 +107,13 @@ export function Editor({ id }: { id?: string }) {
     };
   }, [name, text]);
   function save() {
+    if (sessionPath) {
+      if (updateSessionTextFile(sessionPath, text)) {
+        setDirty(false);
+        setStatus("Saved for this session");
+      } else setStatus("This temporary file is no longer available.");
+      return;
+    }
     const d = saveDocument(name, text, fileId);
     if (d) {
       setFileId(d.id);
@@ -92,7 +140,7 @@ export function Editor({ id }: { id?: string }) {
         <button
           className="button"
           onClick={() => {
-            if (dirty) {
+            if (dirty && !sessionPath) {
               const d = saveDocument(name, text, fileId);
               if (!d) {
                 notify(
@@ -104,6 +152,7 @@ export function Editor({ id }: { id?: string }) {
             setText("");
             setName("Untitled.txt");
             setFileId(undefined);
+            setSessionPath(undefined);
             setDirty(false);
             setStatus("");
           }}
@@ -157,6 +206,12 @@ export function Editor({ id }: { id?: string }) {
         <input
           aria-label="Document name"
           value={name}
+          readOnly={!!sessionPath}
+          title={
+            sessionPath
+              ? "Temporary file names stay fixed for this session"
+              : undefined
+          }
           onChange={(e) => {
             setName(e.target.value);
             setDirty(true);
@@ -172,7 +227,9 @@ export function Editor({ id }: { id?: string }) {
         spellCheck={false}
         value={text}
         onChange={(e) => {
-          setText(e.target.value);
+          const value = e.target.value;
+          setText(value);
+          if (sessionPath) updateSessionTextFile(sessionPath, value);
           setDirty(true);
           setStatus("");
         }}
@@ -182,7 +239,9 @@ export function Editor({ id }: { id?: string }) {
           {status ||
             `${text.split("\n").length} lines · ${text.length} characters`}
         </span>
-        <span>UTF-8 · Local draft</span>
+        <span>
+          {sessionPath ? "UTF-8 · Session only" : "UTF-8 · Local draft"}
+        </span>
       </footer>
     </div>
   );

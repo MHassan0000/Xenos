@@ -181,7 +181,10 @@
   isolation: isolate;
   border: 1px solid color-mix(in srgb, var(--icon-accent) 52%, #20242b);
   background: linear-gradient(145deg, #242a32, #111419 76%);
-  box-shadow: 0 5px 13px #0007, inset 0 1px #ffffff1c, inset 0 -7px 13px #0005;
+  box-shadow:
+    0 5px 13px #0007,
+    inset 0 1px #ffffff1c,
+    inset 0 -7px 13px #0005;
 }
 .desktop-shortcut .app-icon.desktop-logo::before {
   content: "";
@@ -189,8 +192,12 @@
   z-index: -1;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(ellipse at 22% 10%, color-mix(in srgb, var(--icon-accent) 23%, transparent), transparent 58%);
-  opacity: .72;
+  background: radial-gradient(
+    ellipse at 22% 10%,
+    color-mix(in srgb, var(--icon-accent) 23%, transparent),
+    transparent 58%
+  );
+  opacity: 0.72;
   pointer-events: none;
 }
 .desktop-shortcut .app-icon.desktop-logo::after {
@@ -204,17 +211,23 @@
   border-radius: 50%;
   background: var(--icon-accent);
   box-shadow: 0 0 4px color-mix(in srgb, var(--icon-accent) 38%, transparent);
-  opacity: .72;
+  opacity: 0.72;
   pointer-events: none;
 }
 .desktop-shortcut:hover .app-icon.desktop-logo {
   border-color: color-mix(in srgb, var(--icon-accent) 64%, #343a44);
-  box-shadow: 0 6px 15px #0009, 0 0 9px color-mix(in srgb, var(--icon-accent) 9%, transparent), inset 0 1px #ffffff24, inset 0 -7px 13px #0005;
+  box-shadow:
+    0 6px 15px #0009,
+    0 0 9px color-mix(in srgb, var(--icon-accent) 9%, transparent),
+    inset 0 1px #ffffff24,
+    inset 0 -7px 13px #0005;
 }
 .desktop-shortcut .app-icon.desktop-logo svg {
   z-index: 1;
   color: var(--icon-accent);
-  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--icon-accent) 20%, transparent));
+  filter: drop-shadow(
+    0 0 2px color-mix(in srgb, var(--icon-accent) 20%, transparent)
+  );
 }
 .desktop-shortcut .app-icon svg {
   width: 28px;
@@ -251,18 +264,42 @@
   background: linear-gradient(145deg, #37383d, #212226);
   color: #d5d5df;
 }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-files { --icon-accent: #82d8f0; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-document { --icon-accent: #c1a5ff; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-projects { --icon-accent: #f2c477; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-resume { --icon-accent: #6ed9bc; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-terminal { --icon-accent: #9fe49c; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-browser { --icon-accent: #9cb9ff; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-skills { --icon-accent: #db9bff; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-contact { --icon-accent: #ff9caf; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-games { --icon-accent: #ef91d0; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-doom { --icon-accent: #ff8c6d; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-racer { --icon-accent: #67deea; }
-.desktop-shortcut .app-icon.desktop-logo.desktop-logo-trash { --icon-accent: #b7c2d2; }
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-files {
+  --icon-accent: #82d8f0;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-document {
+  --icon-accent: #c1a5ff;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-projects {
+  --icon-accent: #f2c477;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-resume {
+  --icon-accent: #6ed9bc;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-terminal {
+  --icon-accent: #9fe49c;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-browser {
+  --icon-accent: #9cb9ff;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-skills {
+  --icon-accent: #db9bff;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-contact {
+  --icon-accent: #ff9caf;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-games {
+  --icon-accent: #ef91d0;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-doom {
+  --icon-accent: #ff8c6d;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-racer {
+  --icon-accent: #67deea;
+}
+.desktop-shortcut .app-icon.desktop-logo.desktop-logo-trash {
+  --icon-accent: #b7c2d2;
+}
 .desktop-identity {
   position: absolute;
   right: 55px;
@@ -886,6 +923,36 @@
 .context-title {
   color: #8f8f9e;
 }
+.context-create {
+  width: min(360px, calc(100vw - 32px));
+  padding: 19px;
+}
+.context-create form {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+.context-create label {
+  display: grid;
+  gap: 7px;
+  color: #aeb0ba;
+  font-size: 11px;
+}
+.context-create input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 11px;
+  color: #ececf2;
+  background: #131418;
+  border: 1px solid #41434b;
+  border-radius: 7px;
+}
+.context-create .button-row {
+  justify-content: flex-end;
+}
+.context-create .button {
+  min-height: 34px;
+}
 .context-menu hr {
   border-color: #41414a;
 }
@@ -1071,8 +1138,10 @@
     linear-gradient(145deg, #171a1f, #101216);
   border: 1px solid #343a43;
   border-radius: 19px;
-  box-shadow: 0 18px 60px #000b, inset 0 1px #ffffff0b;
-  animation: welcome-notice-in 280ms cubic-bezier(.2,.8,.2,1) both;
+  box-shadow:
+    0 18px 60px #000b,
+    inset 0 1px #ffffff0b;
+  animation: welcome-notice-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 .desktop-welcome-notice > img {
   width: 42px;
@@ -1082,12 +1151,14 @@
   border: 1px solid #ffffff20;
   box-shadow: 0 4px 14px #0005;
 }
-.desktop-welcome-copy { min-width: 0; }
+.desktop-welcome-copy {
+  min-width: 0;
+}
 .desktop-welcome-copy > strong {
   display: block;
   font-size: 16px;
   line-height: 1.3;
-  letter-spacing: -.3px;
+  letter-spacing: -0.3px;
 }
 .desktop-welcome-copy > p {
   margin: 5px 0 4px;
@@ -1109,7 +1180,9 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 650;
-  transition: transform 150ms ease, filter 150ms ease;
+  transition:
+    transform 150ms ease,
+    filter 150ms ease;
 }
 .desktop-welcome-action:hover {
   transform: translateY(-1px);
@@ -1131,8 +1204,14 @@
   background: #ffffff12;
 }
 @keyframes welcome-notice-in {
-  from { opacity: 0; transform: translateY(8px) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 .session-screen {
   position: fixed;
@@ -1409,7 +1488,9 @@
     padding: 17px 43px 16px 16px;
     border-radius: 16px;
   }
-  .desktop-welcome-copy > strong { font-size: 14px; }
+  .desktop-welcome-copy > strong {
+    font-size: 14px;
+  }
   .desktop-surface {
     inset: 0 0 58px;
   }
@@ -1726,7 +1807,7 @@
   border: 1px solid #333943;
   border-radius: 7px;
   font: 9px var(--mono);
-  letter-spacing: .5px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 .skip-startup:hover {
@@ -1809,7 +1890,8 @@
   align-items: center;
   gap: 0;
   text-align: center;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.4s ease;
 }
 .lock-unlocking {
@@ -1851,7 +1933,9 @@
   border: 2px solid #484857;
   display: grid;
   place-items: center;
-  box-shadow: 0 0 0 6px #ffffff06, 0 8px 30px #0009;
+  box-shadow:
+    0 0 0 6px #ffffff06,
+    0 8px 30px #0009;
 }
 .lock-avatar {
   font-size: 22px;
@@ -1888,8 +1972,13 @@
   animation: lock-pulse 3s ease-in-out infinite;
 }
 @keyframes lock-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 /* Unlocked state — input form */
 .lock-small-time {
@@ -1909,12 +1998,18 @@
   border-radius: 50px;
   padding: 6px 6px 6px 22px;
   width: 280px;
-  box-shadow: 0 0 0 1px #ffffff08, 0 8px 25px #0007;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow:
+    0 0 0 1px #ffffff08,
+    0 8px 25px #0007;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .lock-form:focus-within {
   border-color: #5a5a72;
-  box-shadow: 0 0 0 3px #4444661a, 0 8px 25px #0007;
+  box-shadow:
+    0 0 0 3px #4444661a,
+    0 8px 25px #0007;
 }
 .lock-pin-input {
   background: transparent;
@@ -1972,7 +2067,9 @@
   color: #4a4a5e;
   padding: 8px 12px;
   border-radius: 20px;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
 .lock-actions-bar button:hover {
   color: #9090a5;

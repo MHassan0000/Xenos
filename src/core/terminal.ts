@@ -54,7 +54,9 @@ export function runCommand(input: string, cwd: string): CommandResult {
     case "whoami":
       return { output: `${profile.name}  ·  hassan@xenos` };
     case "uname":
-      return { output: "Xenos OS 1.0 · Personal workspace · Browser environment" };
+      return {
+        output: "Xenos OS 1.0 · Personal workspace · Browser environment",
+      };
     case "echo":
       return { output: arg };
     case "fortune":
@@ -160,7 +162,7 @@ export function runCommand(input: string, cwd: string): CommandResult {
             output: `Opening ${file.name}…`,
             open: { app: file.target },
           };
-        if (file.type === "local")
+        if (file.type === "local" || file.type === "session")
           return {
             output: `Opening ${file.name}…`,
             open: { app: "editor", arg: file.target },

@@ -182,14 +182,18 @@ export function Search({
       arg: p.id,
     })),
     ...allFiles()
-      .filter((f) => f.type === "document" || f.type === "local")
+      .filter(
+        (f) =>
+          f.type === "document" || f.type === "local" || f.type === "session",
+      )
       .map((f) => ({
         key: f.path,
         title: f.name,
         detail: "Documents · " + (f.content?.slice(0, 160) || ""),
         icon: "file",
-        app: (f.type === "local" ? "editor" : "document") as AppId,
-        arg: f.type === "local" ? f.target : f.path,
+        app:
+          f.type === "document" ? ("document" as const) : ("editor" as const),
+        arg: f.type === "document" ? f.path : f.target,
       })),
     ...skills.map((s) => ({
       key: s.name,

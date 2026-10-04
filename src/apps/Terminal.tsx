@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { runCommand, completeCommand } from "../core/terminal";
 import { useDesktop } from "../core/context";
+import { getFile } from "../core/filesystem";
 type Line = { input?: string; output: string; cwd?: string };
-export default function Terminal() {
+export default function Terminal({ initialPath }: { initialPath?: string }) {
   const { open } = useDesktop();
   const [lines, setLines] = useState<Line[]>([
     {
@@ -11,12 +12,17 @@ export default function Terminal() {
     },
   ]);
   const [input, setInput] = useState("");
-  const [cwd, setCwd] = useState("/");
+  const [cwd, setCwd] = useState(() =>
+    getFile(initialPath || "")?.type === "folder" ? initialPath! : "/",
+  );
   const history = useRef<string[]>([]);
   const index = useRef(0);
   const draft = useRef("");
   const bottom = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    setCwd(getFile(initialPath || "")?.type === "folder" ? initialPath! : "/");
+  }, [initialPath]);
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: "nearest" });
   }, [lines]);

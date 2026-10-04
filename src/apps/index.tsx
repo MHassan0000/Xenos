@@ -97,7 +97,7 @@ export function Application({
       app = <Files initialPath={win.arg} />;
       break;
     case "terminal":
-      app = <Terminal />;
+      app = <Terminal initialPath={win.arg} />;
       break;
     case "settings":
       app = <Settings />;

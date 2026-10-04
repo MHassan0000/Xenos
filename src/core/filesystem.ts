@@ -1,10 +1,19 @@
 import { profile, projects, skills, journey } from "../data/portfolio";
 import { getDocuments } from "./localFiles";
+import { getSessionEntries } from "./sessionFiles";
 import { gameIds, registry } from "./registry";
 export type FileNode = {
   path: string;
   name: string;
-  type: "folder" | "document" | "project" | "image" | "link" | "app" | "local";
+  type:
+    | "folder"
+    | "document"
+    | "project"
+    | "image"
+    | "link"
+    | "app"
+    | "local"
+    | "session";
   content?: string;
   target?: string;
 };
@@ -111,6 +120,7 @@ export const allFiles = (): FileNode[] => [
       content: d.content,
       target: d.id,
     })),
+  ...getSessionEntries(),
 ];
 export const getFile = (path: string) =>
   allFiles().find(

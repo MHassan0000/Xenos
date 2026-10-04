@@ -10,10 +10,29 @@ import { Icon } from "../components/Icon";
 import { projects } from "../data/portfolio";
 import { isApp } from "../core/registry";
 import { useDocuments, trashDocument } from "../core/localFiles";
+import {
+  createSessionFolder,
+  createSessionTextFile,
+  removeSessionEntry,
+  useSessionEntries,
+} from "../core/sessionFiles";
 import { Popover } from "../components/Popovers";
+function uniqueName(parent: string, requested: string) {
+  const used = new Set(
+    childrenOf(parent).map((entry) => entry.name.toLowerCase()),
+  );
+  const match = requested.match(/^(.*?)(\.[^.]+)?$/);
+  const stem = match?.[1] || requested;
+  const ext = match?.[2] || "";
+  let name = requested;
+  let count = 2;
+  while (used.has(name.toLowerCase())) name = `${stem} (${count++})${ext}`;
+  return name;
+}
 export default function Files({ initialPath = "/" }: { initialPath?: string }) {
   const { open, notify } = useDesktop();
   useDocuments();
+  const sessionEntries = useSessionEntries();
   const [history, setHistory] = useState([
     getFile(initialPath)?.type === "folder" ? initialPath : "/",
   ]);
@@ -21,10 +40,12 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
   const [query, setQuery] = useState("");
   const [list, setList] = useState(false);
   const [context, setContext] = useState<{
-    file: FileNode;
+    file: FileNode | null;
     x: number;
     y: number;
   } | null>(null);
+  const [createMode, setCreateMode] = useState<"folder" | "file" | null>(null);
+  const [draftName, setDraftName] = useState("");
   const path = history[cursor];
   function go(p: string) {
     if (getFile(p)?.type !== "folder") return;
@@ -43,6 +64,7 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
   );
   function launch(f: FileNode) {
     if (f.type === "folder") go(f.path);
+    else if (f.type === "session" && f.target) open("editor", f.target);
     else if (f.type === "app" && f.target && isApp(f.target)) open(f.target);
     else if (f.type === "local") open("editor", f.target);
     else if (f.type === "project") open("project", f.target);
@@ -54,6 +76,30 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
     else if (f.name === "Contact.txt") open("contact");
     else if (f.name === "About.md") open("about");
     else open("document", f.path);
+  }
+  function startCreate(mode: "folder" | "file") {
+    setContext(null);
+    setDraftName(mode === "folder" ? "New Folder" : "Untitled.txt");
+    setCreateMode(mode);
+  }
+  function submitCreate(e: React.FormEvent) {
+    e.preventDefault();
+    const requested = draftName.trim();
+    if (!requested) return;
+    if (createMode === "folder") {
+      const entry = createSessionFolder(path, uniqueName(path, requested));
+      if (entry) notify(`${entry.name} created for this session`);
+    } else {
+      const fileName = /\.[^./\\]+$/.test(requested)
+        ? requested
+        : `${requested}.txt`;
+      const entry = createSessionTextFile(path, uniqueName(path, fileName));
+      if (entry?.target) {
+        open("editor", entry.target);
+        notify(`${entry.name} created for this session`);
+      }
+    }
+    setCreateMode(null);
   }
   return (
     <div className="explorer-app">
@@ -111,6 +157,20 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
         </div>
         <button
           className="icon-button"
+          aria-label="File actions"
+          onClick={(e) => {
+            const box = e.currentTarget.getBoundingClientRect();
+            setContext({
+              file: null,
+              x: Math.min(Math.max(8, box.left), innerWidth - 248),
+              y: box.bottom + 5,
+            });
+          }}
+        >
+          <Icon name="plus" size={17} />
+        </button>
+        <button
+          className="icon-button"
           aria-label={list ? "Switch to grid view" : "Switch to list view"}
           onClick={() => setList(!list)}
         >
@@ -164,7 +224,15 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
             </div>
           </div>
         </aside>
-        <div className="files-main scroll-area">
+        <div
+          className="files-main scroll-area"
+          onContextMenu={(e) => {
+            if ((e.target as HTMLElement).closest("input,button,.file-entry"))
+              return;
+            e.preventDefault();
+            setContext({ file: null, x: e.clientX, y: e.clientY });
+          }}
+        >
           {path === "/Documents" && (
             <button
               className="button"
@@ -202,7 +270,7 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
                       setContext({
                         file: f,
                         x: Math.min(e.clientX, innerWidth - 245),
-                        y: Math.min(e.clientY, innerHeight - 210),
+                        y: Math.min(e.clientY, innerHeight - 350),
                       });
                     }}
                     title={p?.name || f.name}
@@ -238,7 +306,9 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
                     <small>
                       {f.type === "folder"
                         ? `${childrenOf(f.path).length} items`
-                        : f.type}
+                        : f.type === "session"
+                          ? "temporary"
+                          : f.type}
                     </small>
                   </button>
                   {f.type === "local" && (
@@ -276,21 +346,56 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
           close={() => setContext(null)}
           style={{ left: Math.max(8, context.x), top: Math.max(8, context.y) }}
         >
-          <span className="context-title">{context.file.name}</span>
-          <button
-            onClick={() => {
-              launch(context.file);
-              setContext(null);
-            }}
-          >
-            <Icon name="external" />
-            Open
-          </button>
-          {context.file.type === "local" && (
+          <span className="context-title">
+            {context.file?.name ||
+              (path === "/" ? "Home" : path.split("/").at(-1))}
+          </span>
+          {context.file && (
             <button
               onClick={() => {
-                if (trashDocument(context.file.target!))
-                  notify(`${context.file.name} moved to Trash`);
+                launch(context.file!);
+                setContext(null);
+              }}
+            >
+              <Icon name="external" />
+              Open
+            </button>
+          )}
+          <button onClick={() => startCreate("folder")}>
+            <Icon name="folder" />
+            New Folder
+          </button>
+          <button onClick={() => startCreate("file")}>
+            <Icon name="file" />
+            New Text File
+          </button>
+          {context.file?.type === "folder" && (
+            <button
+              onClick={() => {
+                open("terminal", context.file!.path);
+                setContext(null);
+              }}
+            >
+              <Icon name="terminal" />
+              Open in Terminal
+            </button>
+          )}
+          {!context.file && (
+            <button
+              onClick={() => {
+                open("terminal", path);
+                setContext(null);
+              }}
+            >
+              <Icon name="terminal" />
+              Open in Terminal
+            </button>
+          )}
+          {context.file?.type === "local" && (
+            <button
+              onClick={() => {
+                if (trashDocument(context.file!.target!))
+                  notify(`${context.file!.name} moved to Trash`);
                 setContext(null);
               }}
             >
@@ -298,19 +403,77 @@ export default function Files({ initialPath = "/" }: { initialPath?: string }) {
               Move to Trash
             </button>
           )}
-          <button
-            onClick={() => {
-              notify(
-                context.file.type === "folder"
-                  ? `${context.file.name}: ${childrenOf(context.file.path).length} items`
-                  : `${context.file.name} · ${context.file.type}${context.file.content ? ` · ${context.file.content.length} characters` : ""}`,
-              );
-              setContext(null);
-            }}
-          >
-            <Icon name="info" />
-            Properties
-          </button>
+          {context.file && (
+            <button
+              onClick={() => {
+                notify(
+                  context.file!.type === "folder"
+                    ? `${context.file!.name}: ${childrenOf(context.file!.path).length} items`
+                    : `${context.file!.name} · ${context.file!.type}${context.file!.content ? ` · ${context.file!.content.length} characters` : ""}`,
+                );
+                setContext(null);
+              }}
+            >
+              <Icon name="info" />
+              Properties
+            </button>
+          )}
+          {context.file &&
+            sessionEntries.some(
+              (entry) => entry.path === context.file?.path,
+            ) && (
+              <button
+                onClick={() => {
+                  removeSessionEntry(context.file!.path);
+                  setContext(null);
+                  notify(`${context.file!.name} removed for this session`);
+                }}
+              >
+                <Icon name="trash" />
+                Delete temporary item
+              </button>
+            )}
+        </Popover>
+      )}
+      {createMode && (
+        <Popover
+          label={createMode === "folder" ? "Create folder" : "Create text file"}
+          className="context-create"
+          close={() => setCreateMode(null)}
+          style={{
+            left: Math.max(16, (innerWidth - 360) / 2),
+            top: Math.max(16, (innerHeight - 220) / 2),
+          }}
+        >
+          <span className="context-title">
+            New {createMode === "folder" ? "Folder" : "Text File"}
+          </span>
+          <form onSubmit={submitCreate}>
+            <label>
+              <span>Name</span>
+              <input
+                aria-label={
+                  createMode === "folder" ? "Folder name" : "File name"
+                }
+                name="fileName"
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                autoComplete="off"
+              />
+            </label>
+            <div className="button-row">
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => setCreateMode(null)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="button">
+                Create
+              </button>
+            </div>
+          </form>
         </Popover>
       )}
     </div>
