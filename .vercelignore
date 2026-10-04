@@ -3,6 +3,5 @@
 .qa/
 docs/
 tests/
-scripts/
 tsconfig.tsbuildinfo
 *.log
