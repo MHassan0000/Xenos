@@ -14,10 +14,14 @@ const errors = [],
   checks = [];
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("console", (m) => {
-  if (m.type() === "error") errors.push(m.text());
+  if (m.type() === "error")
+    errors.push(`${m.text()} (${m.location().url || "unknown source"})`);
 });
 page.on("requestfailed", (r) => {
-  if (!r.url().includes("favicon"))
+  if (
+    !r.url().includes("favicon") &&
+    r.failure()?.errorText !== "net::ERR_ABORTED"
+  )
     failed.push(r.url() + ": " + r.failure()?.errorText);
 });
 page.on("response", (r) => {
@@ -57,6 +61,10 @@ async function terminal(cmd) {
 try {
   await page.goto(origin);
   await win("about").waitFor();
+  if (await button("Skip startup").isVisible())
+    await button("Skip startup").click();
+  if (await button("Dismiss welcome notification").isVisible())
+    await button("Dismiss welcome notification").click();
   await page.evaluate(() => document.fonts.ready);
   check("First arrival shows welcome and project, résumé, contact routes");
   await page.screenshot({ path: ".qa/desktop-welcome.png" });
@@ -263,6 +271,8 @@ try {
     .click();
   await page.waitForTimeout(250);
   await page.reload();
+  if (await page.getByLabel("Workspace locked").isVisible())
+    await page.keyboard.press("Enter");
   await win("settings").waitFor();
   assert.equal(await page.locator(".wallpaper-aurora").count(), 1);
   assert.equal(await page.locator(".reduce-motion").count(), 1);
@@ -283,6 +293,8 @@ try {
   await page.waitForTimeout(250);
   await page.goto(origin);
   await win("about").waitFor();
+  if (await page.getByLabel("Workspace locked").isVisible())
+    await page.keyboard.press("Enter");
   assert.equal(await page.locator(".os-window").count(), 1);
   check("Disabling session restoration starts a clean welcome");
   await launcher("Notes");

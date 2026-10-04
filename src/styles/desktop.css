@@ -1706,6 +1706,10 @@
   transition: opacity 0.1s;
 }
 .boot-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 10px 22px;
   font-family: var(--mono);
   font-size: 9px;
@@ -1714,6 +1718,24 @@
   border-top: 1px solid #1a1a24;
   background: #020204;
   text-transform: uppercase;
+}
+.skip-startup {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  color: #aeb6c2;
+  border: 1px solid #333943;
+  border-radius: 7px;
+  font: 9px var(--mono);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.skip-startup:hover {
+  color: #eef1f6;
+  background: #ffffff09;
+  border-color: #525c6a;
+}
+.session-boot .skip-startup {
+  margin-top: 18px;
 }
 .boot-restart-log {
   font: 10px/2 var(--mono);

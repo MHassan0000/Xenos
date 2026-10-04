@@ -763,6 +763,10 @@ export default function Desktop() {
               saveStorage(BOOT_DONE_KEY, true);
               setScreen("lock");
             }}
+            onSkip={() => {
+              saveStorage(BOOT_DONE_KEY, true);
+              enterDesktop();
+            }}
           />
         )}
 
@@ -775,6 +779,9 @@ export default function Desktop() {
             <pre className="boot-restart-log">
               Stopping desktop session…{"\n"}Unmounting workspace…{"\n"}Rebooting…
             </pre>
+            <button className="skip-startup" onClick={enterDesktop}>
+              Skip startup
+            </button>
           </div>
         )}
 

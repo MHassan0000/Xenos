@@ -198,6 +198,7 @@ export function runCommand(input: string, cwd: string): CommandResult {
         `hassan@xenos`,
         `─────────────────────────────────────────`,
         `OS         Xenos OS 1.0 (Personal Edition)`,
+        `Environment Portfolio simulation · No access to your computer`,
         `Host       Personal Workspace`,
         `Kernel     6.4.0-xenos`,
         `Shell      portfolio-shell 1.0`,

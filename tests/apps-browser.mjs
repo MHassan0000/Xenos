@@ -42,6 +42,10 @@ async function close(id) {
 try {
   await page.goto(origin);
   await win("about").waitFor();
+  if (await button("Skip startup").isVisible())
+    await button("Skip startup").click();
+  if (await button("Dismiss welcome notification").isVisible())
+    await button("Dismiss welcome notification").click();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: ".qa/revision-desktop.png" });
   await button("Take a break DOOM, racing, chess & more", win("about")).click();
@@ -253,6 +257,8 @@ try {
     "A real local document.",
   );
   await page.reload();
+  if (await page.getByLabel("Workspace locked").isVisible())
+    await page.keyboard.press("Enter");
   await expect(win("editor").getByLabel("Document text")).toHaveValue(
     "A real local document.",
   );

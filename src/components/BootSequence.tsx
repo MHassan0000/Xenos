@@ -41,7 +41,13 @@ const LOGIN_PROMPT_LINES = [
 ];
 
 /* ─── Terminal Boot ──────────────────────────────────────── */
-export function TerminalBoot({ onDone }: { onDone: () => void }) {
+export function TerminalBoot({
+  onDone,
+  onSkip,
+}: {
+  onDone: () => void;
+  onSkip: () => void;
+}) {
   const [lines, setLines] = useState<string[]>([]);
   const [phase, setPhase] = useState<"boot" | "login" | "auth">("boot");
   const [loginInput, setLoginInput] = useState("");
@@ -182,6 +188,9 @@ export function TerminalBoot({ onDone }: { onDone: () => void }) {
           : phase === "login"
             ? "Login: hassan · Password: any key · Press Enter to continue"
             : "Authenticated — loading desktop…"}
+        <button className="skip-startup" onClick={onSkip}>
+          Skip startup
+        </button>
       </div>
     </div>
   );
@@ -222,6 +231,9 @@ export function LockScreen({
   return (
     <div
       className="lock-screen"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Workspace locked"
       tabIndex={-1}
       onKeyDown={handleKey}
       onClick={() => !pressed && setPressed(true)}
