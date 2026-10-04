@@ -1,7 +1,0 @@
-# Dev/reference only — don't deploy
-.reference/
-.qa/
-docs/
-tests/
-tsconfig.tsbuildinfo
-*.log

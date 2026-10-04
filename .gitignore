@@ -1,7 +1,7 @@
 node_modules/
 dist/
 .reference/
-.docs/
+docs/
 .qa/
 *.local
 .env
